@@ -1,0 +1,140 @@
+@media (max-width: 30em) {
+  html {
+    /* height: 10; */
+    width: 50rem;
+  }
+  body {
+    /* overflow: clip; */
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .dashboard-grid {
+    /* max-height: none; */
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .saved-container {
+    display: none;
+  }
+
+  .logo-mobile {
+    width: 8rem;
+    margin-right: 2rem;
+  }
+
+  .login-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .applicant-card,
+  .applicant-list,
+  .applications-list-section {
+    width: 50rem;
+    overflow-x: clip;
+  }
+
+  .dashboard-grid {
+    width: 50rem;
+  }
+
+  .mobile-app-bar {
+    display: flex;
+    margin-bottom: 2rem;
+  }
+
+  .main-header {
+    display: flex;
+    /* flex-direction: column; */
+  }
+
+  .welcome-text h2,
+  .welcome-text h3 {
+    font-size: 1.5rem;
+  }
+
+  .main-dashboard-container {
+    padding-top: 2.5rem;
+  }
+
+  .main-container {
+    height: 100rem;
+    margin-bottom: 20rem;
+    width: 50rem;
+    scroll-behavior: smooth;
+  }
+
+  .status-tracking-section {
+    /* display: none; */
+    height: 90rem;
+    /* padding-right: 0rem; */
+  }
+
+  h4.admission-step-ls {
+    font-size: 1.75rem;
+  }
+
+  .desc-steps {
+    width: 20rem;
+  }
+
+  .desc-steps span {
+    font-size: 1.5rem;
+  }
+
+  span.desc-subtext {
+    font-size: 1rem;
+  }
+
+  .main-container {
+    width: 100%;
+  }
+
+  .main-section {
+    padding: 0;
+    margin: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .side-dashboard {
+    display: none;
+  }
+
+  .dashboard-grid {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .applications-list-section {
+    border-right: none;
+  }
+
+  .applicant-card {
+    margin: 0;
+  }
+
+  .mobile-main {
+  }
+
+  .main-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .btn-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .btn .btn-blue {
+    width: 10rem;
+    height: 2.5rem;
+    font-size: 1rem;
+  }
+}
