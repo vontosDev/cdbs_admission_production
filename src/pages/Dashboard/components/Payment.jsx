@@ -116,8 +116,13 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
             </h3>
             <h3 style={{ textAlign: "left" }}>
               {paymethodId == 1 || paymentId == 1
-                ? " 3. A receipt will be issued as proof of payment please keep it for reference."
+                ? " 3. A receipt will be issued as proof of payment. Please keep it for reference."
                 : "3. Once payment is made, kindly enter the reference number below."}
+            </h3>
+            <h3 style={{ textAlign: "left" }}>
+              {paymethodId == 1 || paymentId == 1
+                ? " 4. Sales Invoice number must be accomplished after payment at the cashier. "
+                : "4. Sales Invoice number must be accomplished after payment. "}
             </h3>
 
             <hr className="payment-line" />
@@ -125,7 +130,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
             <h3 style={{ fontWeight: "bold", textAlign: "center" }}>
               Please enter{" "}
               {paymethodId == 1 || paymentId == 1
-                ? "Official Receipt"
+                ? "Sales Invoice"
                 : "Reference"}{" "}
               Number:
             </h3>
