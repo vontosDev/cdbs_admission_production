@@ -377,6 +377,19 @@ hr {
   font-weight: 800;
 }
 
+.status-text-blue {
+  color: #012169;
+  text-decoration: underline;
+  font-weight: 800;
+}
+
+
+.status-text-red {
+  color: #c8102e;
+  text-decoration: underline;
+  font-weight: 800;
+}
+
 .circle {
   display: flex;
   height: 3.2rem;
@@ -399,11 +412,22 @@ hr {
   justify-content: center;
 }
 
+.circle-waiting {
+  display: flex;
+  height: 3.2rem;
+  width: 3.2rem;
+  background: #012169;
+  border-radius: 1000px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .circle-reject {
   display: flex;
   height: 3.2rem;
   width: 3.2rem;
-  background: red;
+  background: #c8102e;
   border-radius: 1000px;
   flex-direction: column;
   align-items: center;
@@ -1610,7 +1634,7 @@ body {
 }
 
 .payment-line {
-  width: 96%;
+  width: 100%;
 }
 
 .dialog-box {

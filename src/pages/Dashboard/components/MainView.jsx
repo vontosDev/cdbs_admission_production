@@ -16,7 +16,7 @@ import { jwtVerify, SignJWT } from "jose";
 import { Modal, Button, Form } from "react-bootstrap";
 import AdmissionsContext from "../../../context/AdmissionsContext";
 import ReactLoading from "react-loading";
-
+//import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
   const [greeting, setGreeting] = useState("");
   const [cancelReasonString, setCancelReasonString] = useState("");
@@ -122,25 +122,26 @@ function MainView({ setPage, page }) {
   let isPaymentComplete;
   let isPaymentPending;
   let isAssessmentSelected;
+  let isPendingAssessment;
   let isResultSent;
   let isResultPending;
   let isPassed;
 
   let requirementsRejectedArr = [];
 
-  const getUserAdmissions = async () => {
+  const getUserAdmissions = async (forLoading) => {
     if (page == "main" || page == "upload") {
-      setIsLoading(true);
+      setIsLoading(forLoading);
     }
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
+      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -160,6 +161,7 @@ function MainView({ setPage, page }) {
   };
 
   const updateGreeting = () => {
+    getUserAdmissions(false);
     const hour = new Date().getHours();
     let newGreeting = "";
     if (hour >= 5 && hour < 12) {
@@ -176,9 +178,8 @@ function MainView({ setPage, page }) {
 
   // Use useEffect to initialize the greeting and set up the interval
   useEffect(() => {
-    updateGreeting(); // Set initial greeting
+    updateGreeting(); 
     const timer = setInterval(updateGreeting, 10000); // Update every 10 seconds
-
     return () => clearInterval(timer); // Cleanup the interval on component unmount
   }, []);
 
@@ -189,14 +190,14 @@ function MainView({ setPage, page }) {
   ) => {
     setIsLoading(true);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/remove_requirements",
+      "https://dbs-api-live.vercel.app/api/admission/remove_requirements",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           requirements_type: requirementType,
@@ -205,7 +206,7 @@ function MainView({ setPage, page }) {
         }),
       }
     );
-    getUserAdmissions();
+    getUserAdmissions(false);
     console.log(await response.json());
   };
 
@@ -352,6 +353,13 @@ function MainView({ setPage, page }) {
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
         "paymethod_id"
       ] != null;
+
+    isPendingAssessment =admissions["admissionsArr"][dataIndex]["db_admission_table"][
+      "is_for_assessment"
+    ] &&
+    !admissions["admissionsArr"][dataIndex]["db_admission_table"][
+      "is_final_result"
+    ];
 
     isAssessmentSelected =
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -664,13 +672,13 @@ function MainView({ setPage, page }) {
 
         try {
           const fileUploadResponse = await fetch(
-            "https://donboscoapi.vercel.app/api/admission/upload_requirements",
+            "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
             {
               method: "POST",
               headers: {
-                "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+                "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
                 "supabase-key":
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
               },
               body: formData,
             }
@@ -957,14 +965,14 @@ function MainView({ setPage, page }) {
   const handleSlotCheck = async () => {
     setSlotsLoading(true);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/check_slot",
+      "https://dbs-api-live.vercel.app/api/admission/check_slot",
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
       }
     );
@@ -1123,14 +1131,14 @@ function MainView({ setPage, page }) {
       revisedLevelString = "Grade 7 - 12";
     }
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/reserve_slot_exam",
+      "https://dbs-api-live.vercel.app/api/admission/reserve_slot_exam",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           schedule_id: scheduleId,
@@ -1171,19 +1179,21 @@ function MainView({ setPage, page }) {
   };
 
   const handleFileChange = (e) => {
+    const files = e.target.files; // Declare files here
     const allowedFormats = ["image/png", "image/jpeg", "application/pdf"];
-    const invalidFiles = files.filter(
+    
+    // Check for invalid files after initializing files
+    const invalidFiles = Array.from(files).filter(
       (file) => !allowedFormats.includes(file.type)
     );
-
+  
     if (invalidFiles.length > 0) {
-      alert("Incorrect file types has been uploaded");
+      alert("Incorrect file types have been uploaded");
     }
-
-    setSpecialFile(e.target.files);
-    const files = e.target.files;
+  
+    setSpecialFile(files); // Set the selected files in state
     const previews = [];
-
+  
     if (files.length > 0) {
       Array.from(files).forEach((file) => {
         const reader = new FileReader();
@@ -1194,18 +1204,19 @@ function MainView({ setPage, page }) {
             url: isPDF ? reader.result : reader.result, // PDF and image previews
             type: isPDF ? "pdf" : "image",
           });
-
+  
           // Update state once all previews are generated
           if (previews.length === files.length) {
             setFilePreviews(previews);
           }
         };
-
+  
         // Read files as data URLs for images and PDFs
         reader.readAsDataURL(file);
       });
     }
   };
+  
 
   const handleChange = (e, type, subtype) => {
     const { id, value } = e.target;
@@ -1302,14 +1313,14 @@ function MainView({ setPage, page }) {
 
   const handlePersonalSubmission = async () => {
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/create_admission",
+      "https://dbs-api-live.vercel.app/api/admission/create_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1345,14 +1356,14 @@ function MainView({ setPage, page }) {
 
   const handleAcademicSubmission = async () => {
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/create_academic_background",
+      "https://dbs-api-live.vercel.app/api/admission/create_academic_background",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1386,14 +1397,14 @@ function MainView({ setPage, page }) {
     console.log(`LIST: ${JSON.stringify(listA)}`);
 
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/create_family_background_siblings",
+      "https://dbs-api-live.vercel.app/api/admission/create_family_background_siblings",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1483,14 +1494,14 @@ function MainView({ setPage, page }) {
 
     console.log(`BACKID: ${backgroundSelected}`);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/create_family_background_parent",
+      "https://dbs-api-live.vercel.app/api/admission/create_family_background_parent",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           background_id: parseInt(backgroundSelected),
@@ -1513,121 +1524,72 @@ function MainView({ setPage, page }) {
 
   const handleSpecialConcernSubmission = async () => {
     setIsLoading(true);
-
-    if (!specialFile) {
-      setUploadStatus("Please select a file before uploading.");
-      return;
-    }
-
+  
     try {
-      // Step 1: Upload the file
-
-      // console.log(await metadataResponse.json());
-
       const formData = new FormData();
-
-      //  special_concern: specialConcernsData.specialConcern,
-      //       medical_condition: specialConcernsData.medicalCondition,
-      //       medication: specialConcernsData.medication,
-      //       intervention: specialConcernsData.intervention,
-
+  
+      // Append other fields to FormData
       formData.append("admission_id", admissionSelected);
       formData.append("bucket_name", "support_documents");
-      Array.from(specialFile).forEach((file) => {
-        formData.append("files", file); // "files" key is repeated for each file
-      });
-
       formData.append("special_concern", specialConcernsData.specialConcern);
-      formData.append(
-        "medical_condition",
-        specialConcernsData.medicalCondition
-      );
+      formData.append("medical_condition", specialConcernsData.medicalCondition);
       formData.append("medication", specialConcernsData.medication);
       formData.append("intervention", specialConcernsData.intervention);
-
-      // for (let specialFil of specialFile) {
-      //   console.log(
-      //     "File Details:",
-      //     specialFil.name,
-      //     specialFil.size,
-      //     specialFil.type
-      //   );
-      // }
-
+      
+      // Append files to FormData if any
+      if (specialFile && specialFile.length > 0) {
+        Array.from(specialFile).forEach((file) => {
+          formData.append("files", file); // Repeated "files" key for multiple files
+        });
+      }
+  
+      // Send POST request
       const fileUploadResponse = await fetch(
-        "https://donboscoapi.vercel.app/api/admission/create_special_concern",
+        "https://dbs-api-live.vercel.app/api/admission/create_special_concern",
         {
           method: "POST",
           headers: {
-            "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+            "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
             "supabase-key":
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
           },
           body: formData,
         }
       );
-
+  
       if (!fileUploadResponse.ok) {
-        setUploadStatus("Failed to upload file.");
-        setSpecialFile(() => null);
-        setFilePreviews(() => []);
+        setUploadStatus("Failed to submit the form.");
+        setSpecialFile(null);
+        setFilePreviews([]);
+        setIsLoading(false);
         return;
       }
-
+  
       const fileUploadData = await fileUploadResponse.json();
-      console.log(JSON.stringify(fileUploadData));
-      // const uploadedFileUrl = fileData?.fileUrl; // Adjust this based on your API's response format
-
-      // console.log(uploadedFileUrl);
-
-      // Step 2: Send metadata
-      // const metadataResponse = await fetch(
-      //   "https://donboscoapi.vercel.app/api/admission/create_special_concern",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
-      //       "supabase-key":
-      //         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
-      //     },
-      //     body: JSON.stringify({
-      //       admission_id: admissionSelected,
-      //       // supporting_documents: [uploadedFileUrl],
-      //       // bucket_name: "support_documents",
-      //       // file_url: uploadedFileUrl, // Include the uploaded file URL
-      //     }),
-      //   }
-      // );
-
-      // if (!metadataResponse.ok) {
-      //   setUploadStatus("Failed to save special concern.");
-      // } else {
-      //   setUploadStatus("Special concern saved successfully!");
-      // }
-      // console.log(`DATUM: ${JSON.stringify(fileData)}`);
-      // // console.log(uploadedFileUrl);
-      // setUploadStatus("File uploaded successfully!");
+      console.log("Submission Successful:", JSON.stringify(fileUploadData));
+      setUploadStatus("Form submitted successfully!");
     } catch (error) {
       console.error("Error:", error);
       setUploadStatus("An error occurred. Please try again.");
     }
-
-    console.log(uploadStatus);
+  
     setIsLoading(false);
   };
+  
+
+  
 
   const handleSchedCancellation = async (easId, cancelReason) => {
     setIsLoading(true);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/cancel-schedule",
+      "https://dbs-api-live.vercel.app/api/admission/cancel-schedule",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           eas_id: easId,
@@ -1650,14 +1612,14 @@ function MainView({ setPage, page }) {
   const handleSurveySubmission = async () => {
     setIsLoading(true);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/create_survey",
+      "https://dbs-api-live.vercel.app/api/admission/create_survey",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1674,14 +1636,14 @@ function MainView({ setPage, page }) {
   const handleAgreementDeclaration = async () => {
     setIsLoading(true);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/accept_agreement",
+      "https://dbs-api-live.vercel.app/api/admission/accept_agreement",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1723,14 +1685,14 @@ function MainView({ setPage, page }) {
     }
 
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/check_exam_schedule",
+      "https://dbs-api-live.vercel.app/api/admission/check_exam_schedule",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           level_applying_for: revisedLevelString,
@@ -1764,14 +1726,14 @@ function MainView({ setPage, page }) {
     if (page == "main") {
     }
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
+      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -2078,14 +2040,14 @@ function MainView({ setPage, page }) {
 
     setIsLoading(true);
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/register_admission",
+      "https://dbs-api-live.vercel.app/api/admission/register_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -2097,7 +2059,7 @@ function MainView({ setPage, page }) {
       }
     );
 
-    getUserAdmissions();
+    getUserAdmissions(true);
     // setIsLoading(false);
     const result = await response.json();
     console.log(result);
@@ -2352,7 +2314,7 @@ function MainView({ setPage, page }) {
     // });
     console.log(userId);
     handleSessionToken(sessionToken);
-    getUserAdmissions();
+    getUserAdmissions(true);
 
     if (page == "personal-form") {
       // handleDobChange();
@@ -2546,7 +2508,9 @@ function MainView({ setPage, page }) {
                       isPaymentPending={isPaymentPending}
                       isPaymentComplete={isPaymentComplete}
                       isAssessmentSelected={isAssessmentSelected}
+                      isPendingAssessment={isPendingAssessment}
                       isResultSent={isResultSent}
+                      isPassed={isPassed}
                       isApplicationCreated={
                         admissions["admissionsArr"][dataIndex][
                           "db_admission_table"
@@ -2566,7 +2530,7 @@ function MainView({ setPage, page }) {
                         >
                           <span>Register in the Admission Portal</span>
                           <span className="desc-subtext">
-                            admissions.caritasdonboscoschool@edu.ph
+                            admissionportal-cdbs.vercel.app
                           </span>
                         </div>
                         <div
@@ -2669,9 +2633,11 @@ function MainView({ setPage, page }) {
                         </h4>
                       </div>
                     </div>
+                    
                   </section>
                 ) : null}
               </div>
+              
             ) : (
               <div className="center-main">
                 <div className="no-applications-container">
@@ -2690,8 +2656,23 @@ function MainView({ setPage, page }) {
                 >
                   Add Applicant
                 </div>
+                
               </div>
+              
             )}
+            
+            <div className='main-section mobile-main' style={{
+    borderBottom: 'none', // Remove border
+    boxShadow: 'none',    // Remove shadow
+    textDecoration: 'none', // Remove underline
+  }}
+>
+              <section className="applicant-list-section"></section>
+              <section className="status-list-section">
+                {//<StatusCircles />
+                }
+              </section>
+            </div>
           </>
         );
 
@@ -2711,6 +2692,7 @@ function MainView({ setPage, page }) {
                   Online Application Form
                 </h2>
               </div>
+              
               {/* <h3>
            Please enter <span>Learner Information</span>
           </h3> */}
@@ -3880,6 +3862,7 @@ function MainView({ setPage, page }) {
                                 Please select parent status
                               </option>
                               <option value={"Married"}>Married</option>
+                              <option value={"Remarried"}>Remarried</option>
                               <option value={"Separated"}>Separated</option>
                               <option value={"Solo Parent"}>Solo Parent</option>
                               <option value={"Widowed"}>Widowed</option>
@@ -3887,9 +3870,10 @@ function MainView({ setPage, page }) {
                             </select>
                           </div>
                         </div>
-                        {family2Data.parentStatus == "Married" ||
+                        {family2Data.parentStatus == "Married" || family2Data.parentStatus == "Remarried"//||
                         //family2Data.parentStatus == "Separated" ||
-                        family2Data.parentStatus == "Widowed" ? (
+                        //family2Data.parentStatus == "Widowed" ? 
+                        ? (
                           <>
                             <div className="form-col">
                               <p className="label-form">Wedding Type*</p>
@@ -3995,7 +3979,19 @@ function MainView({ setPage, page }) {
            Please enter <span>Learner Information</span>
           </h3> */}
             </div>
-
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                
+                //setPage("survey");
+                /*if(specialConcernsData.specialConcern !='' && specialConcernsData.medicalCondition!='' && specialConcernsData.medication!=''
+                  && specialConcernsData.intervention!='' && specialFile.length >0
+                ){
+                  handleSpecialConcernSubmission();
+                }*/
+                //
+              }}
+            >
             <div className="space-bet-form">
               <div className="form-container">
                 <h3 className="form-heading">Special Concerns</h3>
@@ -4143,9 +4139,14 @@ function MainView({ setPage, page }) {
                 </div>
                 <div
                   className="btn-blue next-btn"
-                  onClick={() => {
+                  onClick={async () => {
+                    //handleSpecialConcernSubmission();
+                    if(specialConcernsData.specialConcern !='' && specialConcernsData.medicalCondition!='' && specialConcernsData.medication!=''
+                      && specialConcernsData.intervention!='' && specialFile.length >0
+                    ){
+                      handleSpecialConcernSubmission();
+                    }
                     setPage("survey");
-                    handleSpecialConcernSubmission();
                   }}
                 >
                   Next
@@ -4156,6 +4157,7 @@ function MainView({ setPage, page }) {
                 <p className="saved-text">SAved just now</p>
               </div>
             </div>
+            </form>
           </>
         );
 
@@ -4189,6 +4191,7 @@ function MainView({ setPage, page }) {
                   handleChange(obj, "survey", "addFactors");
                   handleChange(obj, "survey", "addHeard");
                 } else {
+                  await handleAgreementDeclaration();
                   await handleSurveySubmission();
                   await Swal.fire({
                     title: "Good job!",
@@ -4657,7 +4660,7 @@ function MainView({ setPage, page }) {
                       !declarationPackage || !declarationSupportingDoc
                         ? null
                         : async () => {
-                            await handleAgreementDeclaration();
+                            //await handleAgreementDeclaration();
 
                             setPage("personal-form");
                             setSpecialFile(() => null);
@@ -5290,13 +5293,13 @@ function MainView({ setPage, page }) {
                   <img src={back} onClick={() => setPage("main")} />
                   <h1>Account Information</h1>
                 </div>
-                <button
+                {/*<button
                   className="btn-blue btn btn-add"
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Confirm
-                </button>
+                </button>*/}
               </div>
             </div>
             <div>

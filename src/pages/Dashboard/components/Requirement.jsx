@@ -23,7 +23,9 @@ function Requirement({
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
   const { admissions } = useContext(AdmissionsContext);
-
+  const documentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.['db_admission_table']?.["db_required_documents_table"]?.[0]?.["document_status"] || '';
+  const isPendingOrAccepted = documentStatus && (documentStatus === "pending" || documentStatus === "accepted");
+  console.log(documentStatus);
   const hiddenFileInput = useRef(null);
   let uploadedFiles = [];
   let type;
@@ -177,7 +179,46 @@ function Requirement({
                 </h2>
               </>
             ) : null}
-            {type == "reportPresentCard" || type == "reportPreviousCard" ? (
+            {type == "reportPreviousCard" ? (
+              <>
+                <h2 className="email-text">
+                  Please ensure that you upload a{" "}
+                  <strong>
+                    clear copy of your child’s official report card
+                  </strong>{" "}
+                  , which should include the following details:
+                </h2>
+                <h2 className="email-text">
+                  <strong>
+                    <ul>
+                      <li>learner’s full name</li>
+                      <li>grade level</li>
+                      <li>Learner Reference Number (LRN)</li>
+                      <li>
+                        first to fourth quarter{" "}
+                        <span style={{ fontWeight: "400 " }}>
+                          (with final ratings)
+                        </span>
+                      </li>
+                      <li>attendance records</li>
+                      <li>
+                        conduct grade{" "}
+                        <span style={{ fontWeight: "400 " }}>
+                          (if applicable).
+                        </span>
+                      </li>
+                    </ul>
+                  </strong>
+                </h2>
+                <h2 className="email-text">
+                  The report card must be an official, up-to-date copy
+                  reflecting the information mentioned above, ensuring{" "}
+                  <strong>all pages</strong> are included.
+                </h2>
+              </>
+            ) : null}
+
+          {type == "reportPresentCard"? (
               <>
                 <h2 className="email-text">
                   Please ensure that you upload a{" "}
@@ -239,14 +280,25 @@ function Requirement({
               <>
                 <h2 className="email-text">
                   Please{" "}
-                  <strong>download the parent questionnaire format</strong> ,
+                  <strong>download the parent questionnaire format</strong>,
                   fill it out completely, and{" "}
                   <strong>upload the completed form</strong> here.
                 </h2>
               </>
             ) : null}
 
-            {fileNames.map((el, i) => (
+            {type == "nonCatholicWaiver" ? (
+              <>
+                <h2 className="email-text">
+                  Please{" "}
+                  <strong>download the non-catholic waiver format</strong>,
+                  fill it out completely, and{" "}
+                  <strong>upload the completed form</strong> here.
+                </h2>
+              </>
+            ) : null}
+
+            {/*fileNames.map((el, i) => (
               <div className="item-upload" key={i}>
                 <h2 className="file-text">{el}</h2>
                 <span
@@ -264,8 +316,31 @@ function Requirement({
                   X
                 </span>
               </div>
+            ))*/}
+            {fileNames.map((el, i) => (
+              <div className="item-upload" key={i}>
+                <h2 className="file-text">{el}</h2>
+                <span
+                  className="delete-upload-item"
+                  onClick={() => {
+                    // Remove the selected file from state
+                    setFiles((prevFiles) => prevFiles.filter((_, index) => index !== i));
+                    setFileNames((prevFiles) => prevFiles.filter((_, index) => index !== i));
+                    
+                    // Reset the file input to allow reselection of the same file
+                    const fileInput = document.getElementById('file-input-id');
+                    if (fileInput) {
+                      fileInput.value = '';
+                    }
+
+                    // Optionally handle file change after deletion
+                    handleFileChange(type, files);
+                  }}
+                >
+                  X
+                </span>
+              </div>
             ))}
-            
 
 
 
@@ -379,16 +454,51 @@ function Requirement({
                   Download Questionnaire
                 </button>
               </a>
+              
             ) : null}
             {mainTitle === "Recommendation Letter" ? (
               <a href={recommendTeacher} download="recommendation-teacher">
                 <button
-                  className="btn-blue btn btn-add"
-                  style={{ width: "230px" }}
+                  className={`btn-blue btn btn-add ${isPendingOrAccepted ? "disabled" : ""}`}
+                  style={{ width: "295px" }}
+                  onClick={async (e) => {
+                    //e.preventDefault();
+                    if(isPendingOrAccepted){
+                      e.preventDefault();
+                    }else{
+                      try{
+                        const formData = new FormData();
+                        const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
+                        formData.append("admission_id",admissionId);
+                        formData.append("requirements_type",5);
+                        const fileUploadResponse = await fetch(
+                          "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
+                          {
+                            method: "POST",
+                            headers: {
+                              "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+                              "supabase-key":
+                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+                            },
+                            body: formData,
+                          }
+                        );
+                
+                        // Log the response for debugging purposes
+                        console.log(await fileUploadResponse.json());
+                        fetchAdmissions();
+                      }catch (error) {
+                        console.error("Error uploading file:", error);
+                      }
+                    }
+                    
+              
+                  }
+                }
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
-                  Class Adviser or Subject Teacher
+                  Download Class Adviser or Subject Teacher
                 </button>
               </a>
             ) : null}
@@ -398,12 +508,44 @@ function Requirement({
                 download="recommendation-school-head-counselor"
               >
                 <button
-                  className="btn-blue btn btn-add reco-pad-left"
-                  style={{ width: "230px" }}
+                  className={`btn-blue btn btn-add reco-pad-left ${isPendingOrAccepted ? "disabled" : ""}`}
+                  style={{ width: "290px" }}
+                  onClick={async (e) => {
+                    if(isPendingOrAccepted){
+                      e.preventDefault();
+                    }else{
+                      try{
+                        const formData = new FormData();
+                        const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
+                        formData.append("admission_id",admissionId);
+                        formData.append("requirements_type",5);
+                        const fileUploadResponse = await fetch(
+                          "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
+                          {
+                            method: "POST",
+                            headers: {
+                              "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+                              "supabase-key":
+                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+                            },
+                            body: formData,
+                          }
+                        );
+                
+                        // Log the response for debugging purposes
+                        console.log(await fileUploadResponse.json());
+                        fetchAdmissions();
+                      }catch (error) {
+                        console.error("Error uploading file:", error);
+                      }
+                    }
+              
+                  }
+                }
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
-                  School Head or Counselor
+                  Download School Head or Counselor
                 </button>
               </a>
             ) : null}
@@ -411,11 +553,11 @@ function Requirement({
               <a href={nonCatholicWaiver} download="non-catholic-waiver">
                 <button
                   className="btn-blue btn btn-add reco-pad-left"
-
+                  style={{ width: "230px" }}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
-                  Non-Catholic Waiver
+                  Download Non-Catholic Waiver
                 </button>
               </a>
             ) : null}
@@ -456,13 +598,15 @@ function Requirement({
               className="attach"
               style={{ marginTop: "70px", marginBottom: "70px" }}
               type="file"
+              id="file-input-id"
               accept=".png, .jpeg, .jpg, .pdf"
               multiple
               onChange={(e) => {
-                const files = Array.from(e.target.files);
+                const files = Array.from(e.target.files || []);
                 if (handleFileChange(type, files)) {
                   setFileNames(files.map((file) => file.name) || null);
                 }
+                e.target.value = '';
               }}
             />
             <img

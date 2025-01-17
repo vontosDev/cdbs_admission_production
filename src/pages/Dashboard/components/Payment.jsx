@@ -16,14 +16,14 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
 
   const handlePayment = async (paymentId) => {
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/accept_agreement",
+      "https://dbs-api-live.vercel.app/api/admission/accept_agreement",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissions["admissionsArr"][dataIndex]["admission_id"],
@@ -36,14 +36,14 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
 
   const handleRefNo = async () => {
     const response = await fetch(
-      "https://donboscoapi.vercel.app/api/admission/accept_agreement",
+      "https://dbs-api-live.vercel.app/api/admission/accept_agreement",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissions["admissionsArr"][dataIndex]["admission_id"],
@@ -172,6 +172,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                       });
 
                       if (result.isConfirmed) {
+                        handlePayment(paymentId);
                         handleRefNo();
                         // return;
                       } else {
@@ -229,7 +230,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
             }
             // onClick={addApplicant}
             onClick={() => {
-              handlePayment(paymentId);
+              
               setShowModal(true);
             }}
           >

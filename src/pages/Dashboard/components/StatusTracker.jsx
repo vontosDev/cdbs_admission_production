@@ -10,12 +10,14 @@ function StatusTracker({
   isPaymentComplete,
   isPaymentPending,
   isAssessmentSelected,
+  isPendingAssessment,
   isResultSent,
   isApplicationInReview,
   isApplicationCreated,
   isApplicationPending,
   isUploadCreated,
   isPaid,
+  isPassed,
 }) {
   return (
     <div className="steps-container ">
@@ -27,11 +29,15 @@ function StatusTracker({
         <div title="Complete" className="circle">
           <img src={check} />
         </div>
-      ) : isApplicationPending ? (
+      ): !isApplicationPending ? (
         <div title="Pending" className="circle circle-pending">
           <img src={check} />
         </div>
-      ) : (
+      ): isApplicationPending && !isApplicationComplete ? (
+        <div title="Pending" className="circle circle-waiting">
+          <img src={check} />
+        </div>
+      )  : (
         <div className="circle-outline">2</div>
       )}
       <div className="dash-line"></div>
@@ -43,11 +49,15 @@ function StatusTracker({
         <div title="Please reupload" className="circle circle-reject">
           <img src={close} />
         </div>
-      ) : isUploadPending ? (
+      ) : !isUploadPending && isApplicationComplete? (
         <div title="Pending" className="circle circle-pending">
           <img src={check} />
         </div>
-      ) : (
+      ): isUploadPending && !isUploadComplete && isApplicationComplete?(
+        <div title="Pending" className="circle circle-waiting">
+          <img src={check} />
+        </div>
+      ): (
         <div className="circle-outline">3</div>
       )}
       <div className="dash-line"></div>
@@ -55,29 +65,45 @@ function StatusTracker({
         <div title="Complete" className="circle">
           <img src={check} />
         </div>
-      ) : isPaymentPending ? (
+      ) : !isPaymentPending && isUploadComplete ? (
         <div title="Pending" className="circle circle-pending">
+          <img src={check} />
+        </div>
+      ) : isPaymentPending && !isPaymentComplete ? (
+        <div title="Pending" className="circle circle-waiting">
           <img src={check} />
         </div>
       ) : (
         <div className="circle-outline">4</div>
       )}
       <div className="dash-line"></div>
-      {isAssessmentSelected ? (
+      {isPendingAssessment || isResultSent? (
         <div title="Complete" className="circle">
           <img src={check} />
         </div>
-      ) : (
+      ):!isAssessmentSelected && isPaymentComplete ? (
+        <div title="pending" className="circle circle-pending">
+          <img src={check} />
+        </div>
+      ) : isAssessmentSelected && !isPendingAssessment ? (
+        <div title="pending" className="circle circle-waiting">
+          <img src={check} />
+        </div>
+      ): (
         <div className="circle-outline">5</div>
       )}
       <div className="dash-line"></div>
-      {isResultSent ? (
+      {isResultSent && isPassed ? (
         <div title="Complete" className="circle">
           <img src={check} />
         </div>
-      ) : isAssessmentPending ? (
-        <div title="Pending" className="circle circle-pending">
+      ) : isPendingAssessment ? (
+        <div title="Pending" className="circle circle-waiting">
           <img src={check} />
+        </div>
+      ) : isResultSent && !isPassed? (
+        <div title="Pending" className="circle circle-reject">
+          <img src={close} />
         </div>
       ) : (
         <div className="circle-outline">6</div>

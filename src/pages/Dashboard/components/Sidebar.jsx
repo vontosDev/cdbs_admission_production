@@ -48,8 +48,10 @@ function Sidebar({ setPage }) {
         >
           <SideLink icon={accountIcon} labelText={"My Account"} />
         </div>
-        <SideLink icon={book} labelText={"Contact Directory"} />
-        <SideLink icon={settings} labelText={"Settings"} />
+        {//<SideLink icon={book} labelText={"Contact Directory"} />
+        
+        //<SideLink icon={settings} labelText={"Settings"} />
+        }
       </div>
       <button
         className="btn-blue btn-logout btn"

@@ -23,14 +23,14 @@ function ApplicantCard({
   const handleDelete = async (admissionId) => {
     // setLoading(true);
     await fetch(
-      "https://donboscoapi.vercel.app/api/admission/delete_admission",
+      "https://dbs-api-live.vercel.app/api/admission/delete_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
         },
         body: JSON.stringify({
           admission_id: admissionId,
@@ -39,76 +39,78 @@ function ApplicantCard({
     );
   };
   const getStatusText = () => {
-    if (
-      admissionData["db_admission_table"]["is_application_created"] &&
-      !admissionData["db_admission_table"]["is_complete_view"] &&
-      admissionData["db_admission_table"]["admission_status"] === "in review"
-    ) {
-      return { text: "Application - In Review", color: "yellow" };
-    } else if (
-      !admissionData["db_admission_table"]["is_all_required_file_uploaded"] &&
-      admissionData["db_admission_table"]["admission_status"] === "in review" &&
-      admissionData["db_admission_table"]["db_required_documents_table"]
-        .length !== 0
-    ) {
-      return { text: "Requirements - In Review", color: "yellow" };
-    } else if (
-      admissionData["db_admission_table"]["is_for_assessment"] &&
-      !admissionData["db_admission_table"]["is_final_result"]
-    ) {
-      return { text: "Results - In Review", color: "yellow" };
-    } else if (admissionData["db_admission_table"]["is_final_result"]) {
-      return { text: "Results - Available", color: "green" };
-    } else if (
-      admissionData["db_admission_table"]["db_exam_admission_schedule"].length >
-      0
-    ) {
-      return { text: "Exam - Scheduled", color: "green" };
-    } else if (
-      admissionData["db_admission_table"]["is_application_created"] &&
-      admissionData["db_admission_table"]["is_complete_view"] &&
-      admissionData["db_admission_table"]["is_all_required_file_uploaded"] &&
-      admissionData["db_admission_table"]["is_paid"]
-    ) {
-      return { text: "Schedule - Pending", color: "yellow" };
-    } else if (
-      admissionData["db_admission_table"]["is_application_created"] &&
-      admissionData["db_admission_table"]["is_complete_view"] &&
-      admissionData["db_admission_table"]["is_all_required_file_uploaded"] &&
-      admissionData["db_admission_table"]["paymethod_id"] !== null
-    ) {
-      return { text: "Payment - Pending", color: "yellow" };
-    } else if (
-      admissionData["db_admission_table"]["is_application_created"] &&
-      admissionData["db_admission_table"]["is_complete_view"] &&
-      admissionData["db_admission_table"]["is_all_required_file_uploaded"]
-    ) {
-      return { text: "Requirements - Complete", color: "green" };
-    } else if (
-      !admissionData["db_admission_table"]["is_application_created"] ||
-      !admissionData["db_admission_table"]["is_all_required_file_uploaded"]
-    ) {
-      return { text: "Application - In Progress", color: "yellow" };
-    } else if (
-      admissionData["db_admission_table"]["is_application_created"] &&
-      admissionData["db_admission_table"]["is_complete_view"]
-    ) {
-      return { text: "Application - Complete", color: "green" };
-    } else if (
-      !admissionData["db_admission_table"]["is_paid"] &&
-      admissionData["db_admission_table"]["is_complete_view"]
-    ) {
-      return { text: "Payment - In Progress", color: "yellow" };
-    } else if (
-      admissionData["db_admission_table"]["db_required_documents_table"]
-        .length === 0
-    ) {
-      return { text: "Requirements - In Progress", color: "yellow" };
+    const admissionTable = admissionData["db_admission_table"];
+    const isApplicationCreated = admissionTable["is_application_created"];
+    const isCompleteView = admissionTable["is_complete_view"];
+    const admissionStatus = admissionTable["admission_status"];
+    const requiredDocuments = admissionTable["db_required_documents_table"] || [];
+    const isAllRequiredFileUploaded = admissionTable["is_all_required_file_uploaded"];
+    const isPaid =admissionTable["is_paid"];
+    const payMethod =admissionTable["paymethod_id"];
+    const pendingCount = requiredDocuments.filter(doc => doc.document_status === "pending").length;
+    const rejectCount = requiredDocuments.filter(doc => doc.document_status === "rejected").length;
+    const examSchedCount = admissionTable["db_exam_admission_schedule"].length;
+    const isAssess=admissionTable["is_for_assessment"];
+    const isResult = admissionTable["is_final_result"];
+    const isPassed =admissionTable["is_passed"];
+    // Check application creation and status
+    if (!isApplicationCreated && !isCompleteView && admissionStatus === "registration") {
+      return { text: "Application - Ready to proceed", color: "yellow" };
+    }
+  
+    if (isApplicationCreated && !isCompleteView) {
+      return { text: "Application - Awaiting approval", color: "blue" };
+    }
+  
+    // Check requirements status
+    if (isApplicationCreated && isCompleteView) {
+      if (requiredDocuments.length === 0) {
+        return { text: "Requirements - Ready to proceed", color: "yellow" };
+      }
+  
+      if (pendingCount > 0 && rejectCount === 0) {
+        return { text: "Requirements - Awaiting approval", color: "blue" };
+      }
+  
+      if (rejectCount > 0) {
+        return { text: "Requirements - Rejected, revisions needed", color: "red" };
+      }
+    }
+  
+    // Check if all required files are uploaded
+    if (isAllRequiredFileUploaded && payMethod===null) {
+      return { text: "Payment - Ready to proceed", color: "yellow" };
     }
 
+    if (payMethod !== null && !isPaid) {
+      return { text: "Payment - Awaiting approval", color: "blue" };
+    }
+
+    if(isPaid && examSchedCount===0){
+      return { text: "Assessment Exam - Ready to proceed", color: "yellow" };
+    }
+
+    if(examSchedCount>0 && !isAssess){
+      return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+    }
+
+    if(isAssess && !isResult){
+      return { text: "Results - Awaiting approval", color: "blue" };
+    }
+
+    if(isResult && isPassed){
+      return { text: "Results - Passed", color: "green" };
+    }
+
+    if(!isPassed){
+      return { text: "Results - Failed", color: "red" };
+    }
+    
+  
     // Default case
-    return { text: "Application - In Progress", color: "yellow" };
+    return { text: "Application - Ready to proceed", color: "yellow" };
   };
+  
 
   return (
     <div
@@ -226,9 +228,15 @@ function ApplicantCard({
             <p className="applicant-text">
               Status:{" "}
               <span
-                className={`status-text${
+                className={/*`status-text${
                   getStatusText()["color"] == "green" ? "-green" : ""
-                }`}
+                }`*/
+                 `status-text${
+                  getStatusText()["color"] === "green" ? "-green" : 
+                  getStatusText()["color"] === "blue" ? "-blue" :
+                  getStatusText()["color"] === "red" ? "-red" : ""
+                }` 
+              }
               >
                 {getStatusText()["text"]}
               </span>

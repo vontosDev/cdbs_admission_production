@@ -297,7 +297,10 @@ function ParentGuardianForm({
           /> */}
             </div>
           </div>
-          <div className="form-row">
+          {parentGuardianObj["employmentStatus"]!='Unemployed'
+            ?(
+              <>
+              <div className="form-row">
             <div className="form-col">
               <label htmlFor="name" className="label-form">
                 Employed at*
@@ -459,6 +462,10 @@ function ParentGuardianForm({
               </select>
             </div>
           </div>
+              </>
+            ):null
+          }
+          
         </>
       ) : null}
     </div>
