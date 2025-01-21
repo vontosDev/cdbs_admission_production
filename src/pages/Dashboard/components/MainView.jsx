@@ -16,8 +16,14 @@ import { jwtVerify, SignJWT } from "jose";
 import { Modal, Button, Form } from "react-bootstrap";
 import AdmissionsContext from "../../../context/AdmissionsContext";
 import ReactLoading from "react-loading";
+import { createClient } from "@supabase/supabase-js";
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
+
+  const supabase = createClient('https://ligqdgmwtziqytxyqpvv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8');
+
+  const [realTimeChannel, setRealTimeChannel] = useState(null);
+
   const [greeting, setGreeting] = useState("");
   const [cancelReasonString, setCancelReasonString] = useState("");
   const [application, setApplication] = useState(0);
@@ -43,6 +49,7 @@ function MainView({ setPage, page }) {
   const [specialFile, setSpecialFile] = useState([]);
   const [uploadStatus, setUploadStatus] = useState("");
   const [edit, setEdit] = useState(false);
+  
   const [requirements, setRequirements] = useState([
     { type: "birthCert", file: [] },
     { type: "recentIdPhoto", file: [] },
@@ -107,7 +114,7 @@ function MainView({ setPage, page }) {
   const [cities, setCities] = useState([]);
   const [selectedIdCity, setSelectedIdCity] = useState([]);
   const [baranggays, setBaranggays] = useState([]);
-
+  
   const userId = localStorage.getItem("userId");
 
   let isApplicationPending;
@@ -129,7 +136,7 @@ function MainView({ setPage, page }) {
 
   let requirementsRejectedArr = [];
 
-  const getUserAdmissions = async (forLoading) => {
+  /*const getUserAdmissions = async (forLoading) => {
     if (page == "main" || page == "upload") {
       setIsLoading(forLoading);
     }
@@ -158,10 +165,82 @@ function MainView({ setPage, page }) {
       };
     });
     setIsLoading(false);
+  };*/
+
+  const getUserAdmissions = async (forLoading) => {
+    if (page === "main" || page === "upload") {
+      setIsLoading(forLoading);
+    }
+    const response = await fetch(
+      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "supabase-url": 'https://ligqdgmwtziqytxyqpvv.supabase.co',
+          "supabase-key": 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8',
+        },
+        body: JSON.stringify({
+          user_id: userId,
+        }),
+      }
+    );
+
+    const result = await response.json();
+    handleDobChange();
+    if (response.ok) {
+      console.log(result);
+      setAdmissions(() => ({
+        admissionsArr: [...result.user],
+      }));
+
+      // Set up real-time updates
+      if (!realTimeChannel) {
+        const channelName = `admission_updates_${userId}`;
+        const channel = supabase
+          .channel(channelName)
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "db_user_form_application_table" },
+            (payload) => {
+              console.log("Real-time update:", payload);
+
+              // Handle incoming updates
+              const updatedAdmissions = admissions.admissionsArr.map((admission) =>
+                admission.id === payload.new.id ? payload.new : admission
+              );
+              setAdmissions({ admissionsArr: updatedAdmissions });
+            }
+          )
+          .subscribe((status) => {
+            if (status === "SUBSCRIBED") {
+              console.log(`Subscribed to channel: ${channelName}`);
+            }
+          });
+
+        setRealTimeChannel(channel);
+      }
+    } else {
+      console.error("Failed to fetch user admissions:", result.error);
+    }
+
+    setIsLoading(false);
   };
 
+  useEffect(() => {
+    // Cleanup function to unsubscribe from the channel when the component unmounts
+    return () => {
+      if (realTimeChannel) {
+        realTimeChannel.unsubscribe().then(() => {
+          console.log("Unsubscribed from real-time updates");
+        });
+      }
+    };
+  }, [realTimeChannel]);
+
   const updateGreeting = () => {
-    getUserAdmissions(false);
+    //getUserAdmissions(false);
+    //handleDobChange();
     const hour = new Date().getHours();
     let newGreeting = "";
     if (hour >= 5 && hour < 12) {
@@ -1106,7 +1185,8 @@ function MainView({ setPage, page }) {
     setIsLoading(true);
 
     let revisedLevelString = "";
-    if (gradeLevel == "Pre Kinder" || gradeLevel == "Kinder") {
+    revisedLevelString =gradeLevel;
+    /*if (gradeLevel == "Pre Kinder" || gradeLevel == "Kinder") {
       revisedLevelString = "Pre Kinder & Kinder";
     } else if (gradeLevel == "Grade 1") {
       revisedLevelString = "Grade 1";
@@ -1129,7 +1209,7 @@ function MainView({ setPage, page }) {
       gradeLevel == "Grade 12"
     ) {
       revisedLevelString = "Grade 7 - 12";
-    }
+    }*/
     const response = await fetch(
       "https://dbs-api-live.vercel.app/api/admission/reserve_slot_exam",
       {
@@ -1659,7 +1739,8 @@ function MainView({ setPage, page }) {
   const getSchedules = async (levelApplyingFor) => {
     setIsLoading(true);
     let revisedLevelString = "";
-    if (levelApplyingFor == "Pre Kinder" || levelApplyingFor == "Kinder") {
+    revisedLevelString=levelApplyingFor;
+   /* if (levelApplyingFor == "Pre Kinder" || levelApplyingFor == "Kinder") {
       revisedLevelString = "Pre Kinder & Kinder";
     } else if (levelApplyingFor == "Grade 1") {
       revisedLevelString = "Grade 1";
@@ -1682,7 +1763,7 @@ function MainView({ setPage, page }) {
       levelApplyingFor == "Grade 12"
     ) {
       revisedLevelString = "Grade 7 - 12";
-    }
+    }*/
 
     const response = await fetch(
       "https://dbs-api-live.vercel.app/api/admission/check_exam_schedule",

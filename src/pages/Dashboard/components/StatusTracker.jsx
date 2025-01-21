@@ -49,11 +49,12 @@ function StatusTracker({
         <div title="Please reupload" className="circle circle-reject">
           <img src={close} />
         </div>
-      ) : !isUploadPending && isApplicationComplete? (
+      ) : !isUploadComplete && isApplicationPending && !isUploadPending? (
         <div title="Pending" className="circle circle-pending">
           <img src={check} />
+          {console.log('hi'+isUploadPending)} 
         </div>
-      ): isUploadPending && !isUploadComplete && isApplicationComplete?(
+      ): isApplicationPending && !isUploadComplete && isUploadPending?(
         <div title="Pending" className="circle circle-waiting">
           <img src={check} />
         </div>
@@ -65,7 +66,7 @@ function StatusTracker({
         <div title="Complete" className="circle">
           <img src={check} />
         </div>
-      ) : !isPaymentPending && isUploadComplete ? (
+      ) : !isPaymentPending && isUploadComplete && isApplicationComplete? (
         <div title="Pending" className="circle circle-pending">
           <img src={check} />
         </div>

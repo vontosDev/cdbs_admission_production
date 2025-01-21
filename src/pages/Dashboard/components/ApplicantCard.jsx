@@ -54,19 +54,30 @@ function ApplicantCard({
     const isResult = admissionTable["is_final_result"];
     const isPassed =admissionTable["is_passed"];
     // Check application creation and status
-    if (!isApplicationCreated && !isCompleteView && admissionStatus === "registration") {
+    if (!isApplicationCreated && !isCompleteView) {
       return { text: "Application - Ready to proceed", color: "yellow" };
     }
   
     if (isApplicationCreated && !isCompleteView) {
-      return { text: "Application - Awaiting approval", color: "blue" };
+      
+      if (isApplicationCreated && requiredDocuments.length==0 && rejectCount ===0 ) {
+        return { text: "Requirements - Ready to proceed", color: "yellow" };
+      }
+      if (isApplicationCreated && requiredDocuments.length>0 &&!isAllRequiredFileUploaded) {
+        return { text: "Requirements - Awaiting approval", color: "blue" };
+      }
+      
+      if (isApplicationCreated && rejectCount > 0) {
+        return { text: "Requirements - Rejected, revisions needed", color: "red" };
+      }
+      else{
+        return { text: "Application - Awaiting approval", color: "blue" };
+      }
+      
     }
   
     // Check requirements status
-    if (isApplicationCreated && isCompleteView) {
-      if (requiredDocuments.length === 0) {
-        return { text: "Requirements - Ready to proceed", color: "yellow" };
-      }
+    if (isApplicationCreated || isCompleteView) {
   
       if (pendingCount > 0 && rejectCount === 0) {
         return { text: "Requirements - Awaiting approval", color: "blue" };

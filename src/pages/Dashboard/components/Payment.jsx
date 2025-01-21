@@ -7,12 +7,16 @@ import { Form, Modal } from "react-bootstrap";
 import { useContext, useState } from "react";
 import AdmissionsContext from "../../../context/AdmissionsContext";
 import Swal from "sweetalert2";
+import showEye from "../../../assets/images/showEye.svg";
 
 function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
   const [showModal, setShowModal] = useState(false);
   const { admissions } = useContext(AdmissionsContext);
   const [paymentId, setPaymentId] = useState("");
   const [referenceNo, setReferenceNo] = useState("");
+  const [fileNames, setFileNames] = useState([]);
+  const [files, setFiles] = useState([]);
+
 
   const handlePayment = async (paymentId) => {
     const response = await fetch(
@@ -64,6 +68,26 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
         }
       });
     }
+  };
+
+  const handleFileChange = (type, selectedFiles) => {
+    const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
+    const validFiles = selectedFiles.filter((file) =>
+      allowedTypes.includes(file.type)
+    );
+
+    if (validFiles.length !== selectedFiles.length) {
+      Swal.fire({
+        title: "Invalid file type",
+        text: "Invalid file format. Please upload a PNG, JPEG, or PDF file.",
+        icon: "error",
+      });
+      return false;
+    }
+
+    setFiles(validFiles);
+    setFileNames(validFiles.map((file) => file.name));
+    return true;
   };
 
   return (
@@ -127,13 +151,20 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
 
             <hr className="payment-line" />
             {/* <h2>{formData.email}</h2> */}
-            <h3 style={{ fontWeight: "bold", textAlign: "center" }}>
-              Please enter{" "}
-              {paymethodId == 1 || paymentId == 1
-                ? "Sales Invoice"
-                : "Reference"}{" "}
-              Number:
-            </h3>
+            {
+              admissions["admissionsArr"][dataIndex]['reference_no']=null?
+              <h3 style={{ fontWeight: "bold", textAlign: "center" }}>
+                Your payment is currently being verified. Please allow a moment for processing. Thank you for your patience!
+              </h3>:
+              <h3 style={{ fontWeight: "bold", textAlign: "center" }}>
+                Please enter{" "}
+                {paymethodId == 1 || paymentId == 1
+                  ? "Sales Invoice"
+                  : "Reference"}{" "}
+                Number:
+              </h3>
+            }
+            
             <div
               style={{
                 display: "flex",
@@ -155,7 +186,64 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                   required
                 />
               </Form.Group>
-              {admissions["admissionsArr"][dataIndex]["db_admission_table"][
+
+              {fileNames.length === 0 && admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc']==null? (
+          <>
+            <button
+              style={{
+                padding: "8px 12px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+              onClick={() =>
+                document.getElementById("uploadInput")?.click()
+              }
+            >
+              Upload Proof of Payment
+            </button>
+            <input
+              id="uploadInput"
+              type="file"
+              style={{ display: "none" }}
+              multiple
+              onChange={(e) => {
+                const selectedFiles = Array.from(e.target.files || []);
+                if (handleFileChange("proof", selectedFiles)) {
+                  e.target.value = ""; // Reset the input
+                }
+              }}
+            />
+          </>
+        ) : (
+          <div>
+            {fileNames.map((el, i) => (
+              <div className="item-upload" key={i}>
+                <h4 className="file-text">{el}</h4>
+                <span
+                  className="delete-upload-item"
+                  onClick={() => {
+                    setFiles((prevFiles) =>
+                      prevFiles.filter((_, index) => index !== i)
+                    );
+                    setFileNames((prevFiles) =>
+                      prevFiles.filter((_, index) => index !== i)
+                    );
+                  }}
+                  style={{ cursor: "pointer", color: "red" }}
+                >
+                  X
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+            </div>
+            <br></br>
+            <div>
+            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
                 "reference_no"
               ] === null ? (
                 <button
@@ -173,7 +261,43 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
 
                       if (result.isConfirmed) {
                         handlePayment(paymentId);
-                        handleRefNo();
+                        //handleRefNo();
+                        try{
+                          const formData = new FormData();
+                          const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
+                          formData.append("admission_id",admissionId);
+                          formData.append("reference_no",referenceNo);
+                          files.forEach((file, index) => {
+                            formData.append(`file`, file);
+                          });
+                          const fileUploadResponse = await fetch(
+                            "https://dbs-api-live.vercel.app/api/admission/accept_agreement",
+                            {
+                              method: "POST",
+                              headers: {
+                                "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+                                "supabase-key":
+                                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+                              },
+                              body: formData,
+                            }
+                          );
+                          
+                          if (fileUploadResponse.status) {
+                            Swal.fire({
+                              title: "Reference No. Sent",
+                              text: "Please wait for your payment to be reviewed.",
+                              icon: "success",
+                            }).then((result) => {
+                              if (result.isConfirmed) {
+                                setPage("main");
+                              }
+                            });
+                          }
+
+                        }catch (error) {
+                          console.error("Error uploading file:", error);
+                        }
                         // return;
                       } else {
                         return;
@@ -191,7 +315,26 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 >
                   Submit
                 </button>
-              ) : null}
+              ) : (
+              
+              <>
+                <div className="upload-view-btn-container">
+                                      <a
+                                        id="view-upload"
+                                        href={
+                                          Array.isArray(admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'])
+                                            ? admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc']
+                                            : admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'].replace(/[\[\]"]/g, "")
+                                        }
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <span className="btn-view">
+                                          <img src={showEye} /> Uploaded File
+                                        </span>
+                                      </a>
+                                      </div>
+              </>)}
             </div>
 
             <hr className="line-container" />
