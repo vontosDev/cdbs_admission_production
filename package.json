@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.47.16",
     "bootstrap": "^5.3.3",
     "html2canvas": "^1.4.1",
     "jose": "^5.9.6",
@@ -19,6 +20,7 @@
     "react": "^18.3.1",
     "react-big-calendar": "^1.15.0",
     "react-bootstrap": "^2.10.5",
+    "react-datepicker": "^7.6.0",
     "react-dom": "^18.3.1",
     "react-loading": "^2.0.3",
     "react-router-dom": "^6.27.0",
