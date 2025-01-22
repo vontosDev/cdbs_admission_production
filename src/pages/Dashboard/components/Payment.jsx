@@ -217,29 +217,27 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
               }}
             />
           </>
-        ) : (
-          <div>
-            {fileNames.map((el, i) => (
-              <div className="item-upload" key={i}>
-                <h4 className="file-text">{el}</h4>
-                <span
-                  className="delete-upload-item"
-                  onClick={() => {
-                    setFiles((prevFiles) =>
-                      prevFiles.filter((_, index) => index !== i)
-                    );
-                    setFileNames((prevFiles) =>
-                      prevFiles.filter((_, index) => index !== i)
-                    );
-                  }}
-                  style={{ cursor: "pointer", color: "red" }}
-                >
-                  X
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
+        ) : null}
+            </div>
+            <br></br>
+            <div>
+              {fileNames.length>0 ? (
+                fileNames.map((el, i) => (
+                  <div className="item-upload" key={i}>
+                    <h4 className="file-text">{el}</h4>
+                    <span
+                      className="delete-upload-item"
+                      onClick={() => {
+                        setFiles((prevFiles) => prevFiles.filter((_, index) => index !== i));
+                        setFileNames((prevFileNames) => prevFileNames.filter((_, index) => index !== i));
+                      }}
+                      style={{ cursor: "pointer", color: "red" }}
+                    >
+                      X
+                    </span>
+                  </div>
+                ))
+              ) : null}
             </div>
             <br></br>
             <div>
