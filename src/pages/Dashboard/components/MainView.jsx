@@ -3116,7 +3116,7 @@ function MainView({ setPage, page }) {
                         value={personalData.address}
                         type="text"
                         className="form-textfield third-occ form-control"
-                        placeholder="Enter complete address"
+                        placeholder="House No., Street, Subdivision"
                         required
                       />
                       <select
