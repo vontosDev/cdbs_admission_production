@@ -2911,6 +2911,7 @@ function MainView({ setPage, page }) {
                         // onChange={(e) => {
 
                         // }}
+                        showToday={false}
                         max={today}
                         value={personalData.dateOfBirth}
                         id="dateOfBirth"
