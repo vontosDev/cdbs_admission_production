@@ -17,13 +17,20 @@ import { Modal, Button, Form } from "react-bootstrap";
 import AdmissionsContext from "../../../context/AdmissionsContext";
 import ReactLoading from "react-loading";
 import { createClient } from "@supabase/supabase-js";
+import Flatpickr from "react-flatpickr";
+import "../../../assets/themes/material_blue.css";
+
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
   const supabase = createClient('https://ligqdgmwtziqytxyqpvv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8');
 
   const [realTimeChannel, setRealTimeChannel] = useState(null);
-
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() - 1);
+  maxDate.setMonth(11); // Set month to December (month 11)
+  maxDate.setDate(31);  // Set to the last day of the month (December 31)
+  maxDate.setHours(0, 0, 0, 0);  
   const [greeting, setGreeting] = useState("");
   const [cancelReasonString, setCancelReasonString] = useState("");
   const [application, setApplication] = useState(0);
@@ -41,7 +48,7 @@ function MainView({ setPage, page }) {
   const [schedules, setSchedules] = useState([]);
   const [scheduleForDay, setScheduleForDay] = useState([]);
   const [datesAvailable, setDateAvailable] = useState([]);
-  const [age, setAge] = useState("");
+  const [age, setAge] = useState(0);
   const [dob, setDob] = useState("");
   const [isFather, setIsFather] = useState(false);
   const [isMother, setIsMother] = useState(false);
@@ -49,6 +56,8 @@ function MainView({ setPage, page }) {
   const [specialFile, setSpecialFile] = useState([]);
   const [uploadStatus, setUploadStatus] = useState("");
   const [edit, setEdit] = useState(false);
+  const [dobHandled, setDobHandled] = useState(false);
+
   
   const [requirements, setRequirements] = useState([
     { type: "birthCert", file: [] },
@@ -136,7 +145,7 @@ function MainView({ setPage, page }) {
 
   let requirementsRejectedArr = [];
 
-  /*const getUserAdmissions = async (forLoading) => {
+  const getUserAdmissions = async (forLoading) => {
     if (page == "main" || page == "upload") {
       setIsLoading(forLoading);
     }
@@ -157,7 +166,6 @@ function MainView({ setPage, page }) {
     );
 
     const result = await response.json();
-    console.log(result);
     handleDobChange();
     setAdmissions(() => {
       return {
@@ -165,9 +173,9 @@ function MainView({ setPage, page }) {
       };
     });
     setIsLoading(false);
-  };*/
+  };
 
-  const getUserAdmissions = async (forLoading) => {
+ /* const getUserAdmissions = async (forLoading) => {
     if (page === "main" || page === "upload") {
       setIsLoading(forLoading);
     }
@@ -187,7 +195,10 @@ function MainView({ setPage, page }) {
     );
 
     const result = await response.json();
-    handleDobChange();
+    if((!dobHandled)){
+        handleDobChange();
+        setDobHandled(true);
+    }
     if (response.ok) {
       console.log(result);
       setAdmissions(() => ({
@@ -236,10 +247,10 @@ function MainView({ setPage, page }) {
         });
       }
     };
-  }, [realTimeChannel]);
+  }, [realTimeChannel]);*/
 
   const updateGreeting = () => {
-    //getUserAdmissions(false);
+    getUserAdmissions(false);
     //handleDobChange();
     const hour = new Date().getHours();
     let newGreeting = "";
@@ -258,7 +269,7 @@ function MainView({ setPage, page }) {
   // Use useEffect to initialize the greeting and set up the interval
   useEffect(() => {
     updateGreeting(); 
-    const timer = setInterval(updateGreeting, 10000); // Update every 10 seconds
+    const timer = setInterval(updateGreeting, 30000); // Update every 10 seconds
     return () => clearInterval(timer); // Cleanup the interval on component unmount
   }, []);
 
@@ -2315,14 +2326,13 @@ function MainView({ setPage, page }) {
     setAge("");
   };
 
-
+  //original handleDobChange
   const handleDobChange = (e) => {
     // setIsLoading(true);
     if (personalData.dateOfBirth == null) return;
     console.log(e?.target.value);
     console.log(personalData.dateOfBirth);
-    const selectedDate =
-      new Date(personalData.dateOfBirth) ?? new Date(e.target.value);
+    const selectedDate = new Date(personalData.dateOfBirth) ?? new Date(e.target.value);
     const today = new Date();
 
     // console.log(`DAA: ${selectedDate}`);
@@ -2354,6 +2364,85 @@ function MainView({ setPage, page }) {
     // setDob(e.target.value);
     // setIsLoading(false);
   };
+
+  const handleDobChangeWrapper = (selectedDates) => {
+    // If no date is selected, return early
+    if (!selectedDates || selectedDates.length === 0) {
+      console.error("No valid date selected.");
+      setAge(""); // Clear the age
+      return;
+    }
+  
+    const selectedDate = selectedDates[0]; // Get the first selected date
+    const today = new Date();
+  
+    // Check if the selected date is in the future
+    if (selectedDate > today) {
+      console.error("Selected date is in the future.");
+      setAge(""); // Reset the age if the date is invalid
+      return;
+    }
+  
+    // Calculate the age based on the selected date
+    let calculatedAge = today.getFullYear() - selectedDate.getFullYear();
+    const monthDifference = today.getMonth() - selectedDate.getMonth();
+  
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < selectedDate.getDate())
+    ) {
+      calculatedAge--; // Adjust age if the current month/date is not yet reached
+    }
+  
+    if (calculatedAge < 0) {
+      console.error("Invalid age calculated.");
+      setAge(""); // Reset the age if invalid
+      return;
+    }
+  
+    // Update the calculated age in the state
+    setAge(calculatedAge);
+  
+    // Manually format the date as "YYYY-MM-DD"
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+  
+    // Update the personal data's dateOfBirth field
+    handleChange({ target: { id: "dateOfBirth", value: formattedDate } }, "personal");
+  
+    console.log(`Selected Date: ${formattedDate}`);
+    console.log(`Age: ${calculatedAge}`);
+  };
+  
+  
+  
+  
+
+
+  /*const handleDobChange = (selectedDates) => {
+    const selectedDate = selectedDates[0];
+    const today = new Date();
+  
+    if (selectedDate > today) {
+      setAge("");
+      return;
+    }
+  
+    let calculatedAge = today.getFullYear() - selectedDate.getFullYear();
+    const monthDifference = today.getMonth() - selectedDate.getMonth();
+  
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < selectedDate.getDate())
+    ) {
+      calculatedAge--;
+    }
+  
+    setAge(calculatedAge >= 0 ? calculatedAge : "");
+  };*/
+  
 
   const clearModalRegister = () => {
     setSurname("");
@@ -2899,7 +2988,7 @@ function MainView({ setPage, page }) {
                     </div>
                   </div>
                   <div className="form-row">
-                    <div className="form-col">
+                    {/*<div className="form-col">
                       <label htmlFor="dateOfBirth" className="label-form">
                         Date of Birth*
                       </label>
@@ -2910,8 +2999,7 @@ function MainView({ setPage, page }) {
                         }}
                         // onChange={(e) => {
 
-                        // }}
-                        showToday={false}
+                        // 
                         max={today}
                         value={personalData.dateOfBirth}
                         id="dateOfBirth"
@@ -2921,7 +3009,33 @@ function MainView({ setPage, page }) {
                         required
                         onKeyDown={(e) => e.preventDefault()}
                       />
+                    </div>*/}
+                    <div className="form-col">
+                      <label htmlFor="dateOfBirth" className="label-form">
+                        Date of Birth*
+                      </label>
+                      <Flatpickr
+                        data-enable-time={false}
+                        options={{
+                          maxDate: maxDate, // Disable future dates
+                          disableMobile: true, // Use Flatpickr even on mobile devices
+                          dateFormat: "Y-m-d", // Display format: YYYY-MM-DD
+                          clear:true,
+                          yearSelectorType: "dropdown",
+                        }}
+                        placeholder="Date of Birth"
+                        id="dateOfBirth"
+                        value={personalData.dateOfBirth || undefined} // Ensure proper value format
+                        onChange={handleDobChangeWrapper}
+                        onOpen={() => {
+                          handleChange({ target: { id: "dateOfBirth", value: null } }, "personal");
+                          setAge(0); // Reset age to 0 when the picker is opened
+                        }}
+                        className="form-textfield third-occ form-control"
+                      />
                     </div>
+
+
                     <div className="form-col">
                       <p className="label-form">Place of Birth*</p>
                       <input

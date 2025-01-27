@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+import Flatpickr from "react-flatpickr";
+import "../../../assets/themes/material_blue.css";
+
 function ParentGuardianForm({
   nameLabel,
   parentGuardianObj,
@@ -11,8 +14,7 @@ function ParentGuardianForm({
   //   nameLabel: nameLabel,
   // };
   const [ageField, setAgeField] = useState("");
-  const today = new Date().toISOString().split("T")[0];
-  const handleDobChange = (e) => {
+  /*const handleDobChange = (e) => {
     // setIsLoading(true);
     if (parentGuardianObj["dateOfBirth"] == null) return;
     // console.log(e?.target.value);
@@ -54,7 +56,68 @@ function ParentGuardianForm({
   useEffect(() => {
     handleDobChange();
     // console.log(parentGuardianObj);
-  }, [parentGuardianObj.dateOfBirth]);
+  }, [parentGuardianObj.dateOfBirth]);*/
+
+
+
+  const handleDobChangeWrapper = (selectedDates) => {
+    // If no date is selected, return early
+    if (!selectedDates || selectedDates.length === 0) {
+      console.error("No valid date selected.");
+      setAgeField(""); // Clear the age
+      return;
+    }
+  
+    const selectedDate = selectedDates[0]; // Get the first selected date
+    const today = new Date();
+  
+    // Check if the selected date is in the future
+    if (selectedDate > today) {
+      console.error("Selected date is in the future.");
+      setAgeField(""); // Reset the age if the date is invalid
+      return;
+    }
+  
+    // Calculate the age based on the selected date
+    let calculatedAge = today.getFullYear() - selectedDate.getFullYear();
+    const monthDifference = today.getMonth() - selectedDate.getMonth();
+  
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < selectedDate.getDate())
+    ) {
+      calculatedAge--; // Adjust age if the current month/date is not yet reached
+    }
+  
+    if (calculatedAge < 0) {
+      console.error("Invalid age calculated.");
+      setAgeField(""); // Reset the age if invalid
+      return;
+    }
+  
+    // Update the calculated age in the state
+    setAgeField(calculatedAge);
+  
+    // Manually format the date as "YYYY-MM-DD"
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+  
+    // Update the personal data's dateOfBirth field
+    handleChange(
+      { target: { id: "dateOfBirth", value: formattedDate } },
+      "family2",
+      nameLabel === "Father's"
+        ? "father"
+        : nameLabel === "Mother's Maiden"
+        ? "mother"
+        : "guardian"
+    );
+  
+    console.log(`Selected Date: ${formattedDate}`);
+    console.log(`Age: ${calculatedAge}`);
+  };
 
   return (
     <div
@@ -167,7 +230,7 @@ function ParentGuardianForm({
               <label htmlFor="name" className="label-form">
                 Date of Birth*
               </label>
-              <input
+              {/*<input
                 onChange={(e) => {
                   handleChange(
                     e,
@@ -189,7 +252,38 @@ function ParentGuardianForm({
                 readOnly={!checked}
                 required={checked}
                 onKeyDown={(e) => e.preventDefault()}
-              />
+              />*/}
+              <Flatpickr
+                  data-enable-time={false}
+                  options={{
+                    maxDate: "today",
+                    disableMobile: true,
+                    dateFormat: "Y-m-d",
+                    clear: true,
+                  }}
+                  placeholder="Family Name"
+                  id="dateOfBirth"
+                  value={parentGuardianObj["dateOfBirth"] || ""}
+                  onChange={
+                    handleDobChangeWrapper}
+                  onOpen={() => {
+                    
+                    handleChange(
+                      { target: { id: "dateOfBirth", value: null } },
+                      "family2",
+                      nameLabel === "Father's"
+                        ? "father"
+                        : nameLabel === "Mother's Maiden"
+                        ? "mother"
+                        : "guardian"
+                    );
+                    setAgeField(0); // Reset age to 0
+                  }}
+                  className="form-textfield third-occ form-control"
+                  readOnly={!checked}
+                  required={checked}
+                />
+
             </div>
             <div className="form-col fifth-occ">
               <p className="label-form">Age*</p>

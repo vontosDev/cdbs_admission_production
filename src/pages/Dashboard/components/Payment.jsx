@@ -102,6 +102,25 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
         </Modal.Header> */}
         <Modal.Body>
           <div className="payment-box">
+          <div 
+              className="close-icon" 
+              onClick={() => {
+                if (
+                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                    "paymethod_id"
+                  ] === 1 ||
+                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                    "paymethod_id"
+                  ] === 2
+                ) {
+                  setPage("main");
+                } else {
+                  setShowModal(false);
+                }
+              }}
+            >
+              ✕
+            </div>
             <img
               src={paymethodId == 1 || paymentId == 1 ? wallet : unionBank}
               className="logo-verification"
@@ -111,7 +130,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 ? "Payment Instructions for Admission Fee (Cash Payment)"
                 : "Pay through UnionBank Bills Payment"}
             </h1>
-            <h3 style={{ textAlign: "left" }}>
+            <h3 style={{ textAlign: "center", fontFamily: 'Roboto, sans-serif' }}>
               {paymethodId == 1 || paymentId == 1
                 ? "To complete the admission process, please follow these steps for cash payment:"
                 : (
@@ -128,22 +147,22 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                   </>
                 )}
             </h3>
-            <h3 style={{ textAlign: "left" }}>
+            <h3 style={{ textAlign: "center", fontFamily: 'Roboto, sans-serif' }}>
               {paymethodId == 1 || paymentId == 1
                 ? "1. Payment Location: Cashier, Caritas Don Bosco School Lobby"
                 : "2. Once the UB account is created, go to ''Pay Bills'', ''Select Biller'', and search ''Caritas Don Bosco School''."}
             </h3>
-            <h3 style={{ textAlign: "left" }}>
+            <h3 style={{ textAlign: "center", fontFamily: 'Roboto, sans-serif' }}>
               {paymethodId == 1 || paymentId == 1
                 ? "2. Payment Hours: Monday to Friday: 7:00 AM - 4:00; Saturday, 8:00AM - 12:00 PM."
                 : "The account will be ready to use for any CDBS transaction."}
             </h3>
-            <h3 style={{ textAlign: "left" }}>
+            <h3 style={{ textAlign: "center", fontFamily: 'Roboto, sans-serif' }}>
               {paymethodId == 1 || paymentId == 1
                 ? " 3. A receipt will be issued as proof of payment. Please keep it for reference."
                 : "3. Once payment is made, kindly enter the reference number below."}
             </h3>
-            <h3 style={{ textAlign: "left" }}>
+            <h3 style={{ textAlign: "center", fontFamily: 'Roboto, sans-serif' }}>
               {paymethodId == 1 || paymentId == 1
                 ? " 4. Sales Invoice number must be accomplished after payment at the cashier. "
                 : "4. Sales Invoice number must be accomplished after payment. "}
@@ -187,17 +206,36 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 />
               </Form.Group>
 
-              {fileNames.length === 0 && admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc']==null? (
+              { (
           <>
             <button
               style={{
                 padding: "8px 12px",
-                backgroundColor: "#007bff",
+                backgroundColor: 
+                  fileNames.length === 0 && 
+                  admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null
+                    ? "#012169" // Blue color if true
+                    : "gray", // Gray color if false
                 color: "#fff",
                 border: "none",
                 borderRadius: "4px",
-                cursor: "pointer",
+                cursor: 
+                  fileNames.length === 0 && 
+                  admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null
+                    ? "pointer" // Clickable if true
+                    : "not-allowed", // Not clickable if false
+                width: "20rem",
+                height: "4rem",
+                fontSize: "12px",
+                opacity: 
+                  fileNames.length === 0 && 
+                  admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null
+                    ? 1 // Fully visible if true
+                    : 0.6, // Dimmed if false
               }}
+              disabled={
+                !(fileNames.length === 0 && admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null)
+              } // Disables button when the condition is false
               onClick={() =>
                 document.getElementById("uploadInput")?.click()
               }
@@ -217,9 +255,10 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
               }}
             />
           </>
-        ) : null}
+        )}
             </div>
             <br></br>
+            
             <div>
               {fileNames.length>0 ? (
                 fileNames.map((el, i) => (
@@ -247,7 +286,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 <button
                   type="button"
                   onClick={async () => {
-                    if (referenceNo.length != 0) {
+                    if (referenceNo.length !== 0 && fileNames.length !== 0) {
                       var result = await Swal.fire({
                         title: "Are you sure?",
                         text: `Please check if reference number is correct: ${referenceNo}`,
@@ -304,11 +343,14 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                   }}
                   style={{
                     padding: "8px 16px",
-                    backgroundColor: "#007BFF",
+                    backgroundColor: referenceNo.length === 0 || fileNames.length === 0 ? "#B0B0B0" : "#012169", // Gray when disabled
                     color: "#fff",
                     border: "none",
                     borderRadius: "4px",
-                    cursor: "pointer",
+                    cursor: referenceNo.length === 0 || fileNames.length === 0 ? "not-allowed" : "pointer", // Change cursor when disabled
+                    width: "45rem",
+                    height: "4rem",
+                    fontSize: "12px",
                   }}
                 >
                   Submit
@@ -336,25 +378,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
             </div>
 
             <hr className="line-container" />
-            <button
-              className="btn btn-blue"
-              onClick={() => {
-                if (
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "paymethod_id"
-                  ] === 1 ||
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "paymethod_id"
-                  ] === 2
-                ) {
-                  setPage("main");
-                } else {
-                  setShowModal(false);
-                }
-              }}
-            >
-              Close
-            </button>
+            
           </div>
         </Modal.Body>
       </Modal>
