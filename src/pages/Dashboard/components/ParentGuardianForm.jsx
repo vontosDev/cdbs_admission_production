@@ -261,7 +261,7 @@ function ParentGuardianForm({
                     dateFormat: "Y-m-d",
                     clear: true,
                   }}
-                  placeholder="Family Name"
+                  placeholder="Date of Birth"
                   id="dateOfBirth"
                   value={parentGuardianObj["dateOfBirth"] || ""}
                   onChange={

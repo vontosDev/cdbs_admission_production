@@ -63,7 +63,7 @@ function ApplicantCard({
       if (isApplicationCreated && requiredDocuments.length==0 && rejectCount ===0 ) {
         return { text: "Requirements - Ready to proceed", color: "yellow" };
       }
-      if (isApplicationCreated && requiredDocuments.length>0 &&!isAllRequiredFileUploaded) {
+      if (isApplicationCreated && requiredDocuments.length>0 &&!isAllRequiredFileUploaded && rejectCount==0) {
         return { text: "Requirements - Awaiting approval", color: "blue" };
       }
       

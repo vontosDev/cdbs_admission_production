@@ -23,9 +23,15 @@ function Requirement({
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
   const { admissions } = useContext(AdmissionsContext);
-  const documentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.['db_admission_table']?.["db_required_documents_table"]?.[0]?.["document_status"] || '';
+  //const documentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.['db_admission_table']?.["db_required_documents_table"]?.[0]?.["document_status"] || '';
+  const documentStatus = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_required_documents_table"]
+  .filter((el) => typeId === el.requirements_type) // Filter by reject_reason and typeId
+  .map((el) => el.document_status);
+  const requiredDocumentsTable  = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_required_documents_table"]
+  .filter((el) => el.reject_reason && typeId === el.requirements_type) // Filter by reject_reason and typeId
+  .map((el) => el.reject_reason);
   const isPendingOrAccepted = documentStatus && (documentStatus === "pending" || documentStatus === "accepted");
-  console.log(documentStatus);
+  
   const hiddenFileInput = useRef(null);
   let uploadedFiles = [];
   let type;
@@ -117,6 +123,7 @@ function Requirement({
     ];
   }
 
+
   const handleFileChange = (type, file) => {
     const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
     const validFiles = file.filter((file) => allowedTypes.includes(file.type));
@@ -146,17 +153,31 @@ function Requirement({
   return (
     <div
       className="requirement-container"
-      style={{ backgroundColor: isRejected ? "#ff9999" : "" }}
+      //style={{ backgroundColor: isRejected ? "#ff9999" : "" }}
     >
       <div className="rqment-text">
         <div className="requirement-text">
           <div>
-            <h2 className="main-requirement-text">
-              {mainTitle}
-              <span style={{ color: "red", fontStyle: "italic" }}>
-                {isRejected ? " -- Please reupload" : ""}
-              </span>
-            </h2>
+              <h2 className="main-requirement-text" style={{ position: 'relative' }}>
+              {isRejected && (
+                  <div 
+                    style={{
+                      position: 'absolute',
+                      top: '-5px', // Adjust to position the circle higher or lower
+                      left: '-8px', // Adjust to position the circle more to the left or right
+                      width: '15px', // Size of the circle
+                      height: '15px', // Size of the circle
+                      borderRadius: '50%', // Makes it a circle
+                      backgroundColor: 'red', // Red color for the circle
+                      zIndex: 1, // Ensure it floats on top
+                    }}
+                  />
+                )}
+                {mainTitle}
+                <span style={{ color: "red", fontStyle: "italic" }}>
+                  {isRejected ? " -- Please reupload "+"( "+requiredDocumentsTable+" )" : ""}
+                </span>
+              </h2>
             {type == "birthCert" ? (
               <>
                 <h2 className="email-text">

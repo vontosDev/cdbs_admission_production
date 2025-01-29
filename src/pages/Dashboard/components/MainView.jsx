@@ -17,6 +17,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import AdmissionsContext from "../../../context/AdmissionsContext";
 import ReactLoading from "react-loading";
 import { createClient } from "@supabase/supabase-js";
+import circle_cross from "../../../assets/images/circle_cross.png";
 import Flatpickr from "react-flatpickr";
 import "../../../assets/themes/material_blue.css";
 
@@ -5342,7 +5343,60 @@ function MainView({ setPage, page }) {
                   </div>
                 </Modal.Body>
               </Modal>
-            ) : null}
+            ) : schedules.length == 0 ? <Modal
+            show={schedules.length==0
+            }
+            id="modal-container"
+            centered
+          >
+            {
+            console.log('Hi'+scheduleForDay.length)
+            /* <Modal.Header closeButton>
+      <Modal.Title>Applicant Information</Modal.Title>
+    </Modal.Header> */}
+            <Modal.Body>
+              <div className="payment-box">
+              <div 
+                className="close-icon" 
+                onClick={() => {
+                    setPage("main");
+                    setShowReschedModal(false);
+                }}
+              >
+                ✕
+              </div>
+                {/* <img src={wallet} className="logo-verification" /> Walang Sched*/}
+                
+                <br></br>
+                <br></br>
+                <img src={circle_cross} className="logo-verification" />
+                <br></br>
+                <br></br>
+                <h3>
+                  No Available Schedule Yet
+                </h3>
+                <h5>
+                  Please wait for further announcements and updates for the next available schedule. Thank you.
+                  
+                
+                </h5>
+                <span className="time-header" style={{width:'40rem'}}></span>
+                <hr className="line-container" />
+                {/* <hr className="payment-line" /> */}
+                {/* <h2>{formData.email}</h2> */}
+                <button
+                  className="btn btn-blue"
+                  onClick={() => {
+                    setPage("main");
+                    setShowReschedModal(false);
+                  }}
+                  style={{width:'40rem'}}
+                >
+                  Back to Admission Process
+                </button>
+              </div>
+            </Modal.Body>
+          </Modal>:null}
             <Modal show={showCalendarModal} id="modal-container" centered>
               {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
