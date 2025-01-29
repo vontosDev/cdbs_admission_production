@@ -54,7 +54,7 @@ function StatusTracker({
           <img src={check} />
           {console.log('hi'+isUploadPending)} 
         </div>
-      ): isApplicationPending && !isUploadComplete && isUploadPending?(
+      ): isApplicationComplete ||( isApplicationPending && !isUploadComplete && isUploadPending)?(
         <div title="Pending" className="circle circle-waiting">
           <img src={check} />
         </div>
