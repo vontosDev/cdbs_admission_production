@@ -23,6 +23,7 @@ function Requirement({
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
   const { admissions } = useContext(AdmissionsContext);
+  const isRequiredViewing = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_requirements_viewing"];
   //const documentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.['db_admission_table']?.["db_required_documents_table"]?.[0]?.["document_status"] || '';
   const documentStatus = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_required_documents_table"]
   .filter((el) => typeId === el.requirements_type) // Filter by reject_reason and typeId
@@ -430,7 +431,7 @@ function Requirement({
                           <img src={showEye} /> Uploaded File
                         </span>
                       </a>
-                      {(el.document_status !== "accepted") && (  // Check if file is not approved or hasn't been uploaded yet
+                      {(el.document_status !== "accepted" && !isRequiredViewing) && (  // Check if file is not approved or hasn't been uploaded yet
                         <button
                           className="close-btn"
                           onClick={async () => {
