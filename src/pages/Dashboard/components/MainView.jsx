@@ -5329,7 +5329,7 @@ function MainView({ setPage, page }) {
                     >
                       Ok, got it!
                     </button>
-                    <button
+                    {/*<button
                       className="btn btn-red"
                       onClick={() => {
                         console.log("wahaha");
@@ -5339,7 +5339,7 @@ function MainView({ setPage, page }) {
                       }}
                     >
                       Reschedule
-                    </button>
+                    </button>*/}
                   </div>
                 </Modal.Body>
               </Modal>
