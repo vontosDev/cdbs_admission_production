@@ -9,7 +9,7 @@ env:
   PROJECT_ID: 'don-bosco-420805'
   SERVICE: 'cdbs-admission-uat'
   REGION: 'asia-southeast2'
-  GAR_NAME: 'gar-cdbs-admission-uat'
+  GAR_NAME: 'gar-cdbs-admission'
   SERVICE_ACCOUNT_NAME: 'cdbs-admission-uat'
   GAR_LOCATION: 'asia-southeast2'
 
