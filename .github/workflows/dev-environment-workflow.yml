@@ -1,4 +1,4 @@
-name: 'Build and Deploy to Cloud Run-TestEnvironment'
+name: 'Build and Deploy to Cloud Run- DevEnvironment'
 
 on:
   push:
