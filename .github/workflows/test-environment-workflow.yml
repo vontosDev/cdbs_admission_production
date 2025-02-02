@@ -3,7 +3,7 @@ name: 'Build and Deploy to Cloud Run-TestEnvironment'
 on:
   push:
     branches:
-      - test-environment      # Trigger test-environment deployment
+      - dev     # Trigger dev deployment
 
 env:
   PROJECT_ID: 'don-bosco-420805'
