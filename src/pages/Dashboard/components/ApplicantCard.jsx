@@ -58,12 +58,12 @@ function ApplicantCard({
       return { text: "Application - Ready to proceed", color: "yellow" };
     }
   
-    if (isApplicationCreated && !isCompleteView) {
+    if ((isApplicationCreated && !isCompleteView) || isCompleteView) {
       
       if (isApplicationCreated && requiredDocuments.length==0 && rejectCount ===0 ) {
         return { text: "Requirements - Ready to proceed", color: "yellow" };
       }
-      if (isApplicationCreated && requiredDocuments.length>0 &&!isAllRequiredFileUploaded) {
+      if (isApplicationCreated && requiredDocuments.length>0 &&!isAllRequiredFileUploaded && rejectCount==0) {
         return { text: "Requirements - Awaiting approval", color: "blue" };
       }
       
@@ -77,7 +77,7 @@ function ApplicantCard({
     }
   
     // Check requirements status
-    if (isApplicationCreated || isCompleteView) {
+    if (isApplicationCreated && isCompleteView) {
   
       if (pendingCount > 0 && rejectCount === 0) {
         return { text: "Requirements - Awaiting approval", color: "blue" };
@@ -109,15 +109,14 @@ function ApplicantCard({
       return { text: "Results - Awaiting approval", color: "blue" };
     }
 
-    if(isResult && isPassed){
-      return { text: "Results - Passed", color: "green" };
+    if(isResult){
+      if(isPassed){
+        return { text: "Results - Passed", color: "green" };
+      }else{
+        return { text: "Results - Failed", color: "red" };
+      }
     }
 
-    if(!isPassed){
-      return { text: "Results - Failed", color: "red" };
-    }
-    
-  
     // Default case
     return { text: "Application - Ready to proceed", color: "yellow" };
   };
