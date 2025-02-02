@@ -7,10 +7,10 @@ on:
 
 env:
   PROJECT_ID: 'don-bosco-420805'
-  SERVICE: 'cdbs-admission-test-environment'
+  SERVICE: 'cdbs-admission-dev'
   REGION: 'asia-southeast2'
   GAR_NAME: 'gar-cdbs-admission'
-  SERVICE_ACCOUNT_NAME: 'cdbs-admission-production'
+  SERVICE_ACCOUNT_NAME: 'cdbs-admission-dev'
   GAR_LOCATION: 'asia-southeast2'
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           project_id: ${{ env.PROJECT_ID }}
-          credentials_json: ${{ secrets.GCP_ADMISSION_KEY}}
+          credentials_json: ${{ secrets.CDBS_DEV_KEY}}
 
       - name: 'Docker Auth'
         run: gcloud auth configure-docker "${{ env.REGION }}-docker.pkg.dev"
