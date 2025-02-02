@@ -1,0 +1,64 @@
+name: 'Development Action File'
+
+on:
+  push:
+    branches:
+      - dev   
+
+env:
+  PROJECT_ID: 'don-bosco-420805'
+  SERVICE: 'cdbs-admission-dev'
+  REGION: 'asia-southeast2'
+  GAR_NAME: 'gar-cdbs-admission'
+  SERVICE_ACCOUNT_NAME: 'cdbs-admission-dev'
+  GAR_LOCATION: 'asia-southeast2'
+
+jobs:
+  deploy:
+    runs-on: 'ubuntu-latest'
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: 'Checkout Code'
+        uses: 'actions/checkout@v4'
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          credentials_json: ${{ secrets.CDBS_DEV_KEY}}
+
+      - name: 'Docker Auth'
+        run: gcloud auth configure-docker "${{ env.REGION }}-docker.pkg.dev"
+
+      - name: 'Build and Push Container'
+        run: |-
+          DOCKER_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_NAME }}/${{ env.SERVICE }}:${{ github.sha }}"
+          docker build --tag "${DOCKER_TAG}" .
+          docker push "${DOCKER_TAG}"
+
+      - name: 'Deploy to Cloud Run'
+        run: |
+            gcloud run deploy ${{ env.SERVICE }} \
+                --image ${{ env.REGION }}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.GAR_NAME}}/${{env.SERVICE}}:${{github.sha}} \
+                --service-account ${{env.SERVICE_ACCOUNT_NAME}}@${{env.PROJECT_ID}}.iam.gserviceaccount.com \
+                --region ${{ env.REGION }} \
+                --platform managed \
+                --allow-unauthenticated
+
+      - name: 'Allow unauthenticated access to Cloud Run'
+        run: |
+            gcloud run services add-iam-policy-binding ${{ env.SERVICE }} \
+              --region ${{ env.REGION }} \
+              --member="allUsers" \
+              --role="roles/run.invoker"
+              
+      - name: 'Show output'
+        run: |
+            echo ${{ steps.deploy.outputs.url }}
+
+
