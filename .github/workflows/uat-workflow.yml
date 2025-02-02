@@ -1,9 +1,9 @@
-name: 'Build and Deploy to Cloud Run- DevEnvironment'
+name: 'Build and Deploy to Cloud Run- UATEnvironment'
 
 on:
   push:
     branches:
-      - UAT    # Trigger dev deployment
+      - UAT    # Trigger uat deployment
 
 env:
   PROJECT_ID: 'don-bosco-420805'
