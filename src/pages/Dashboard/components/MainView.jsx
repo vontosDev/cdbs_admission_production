@@ -24,7 +24,7 @@ import "../../../assets/themes/material_blue.css";
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
-  const supabase = createClient('https://ligqdgmwtziqytxyqpvv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8');
+  const supabase = createClient('https://srseiyeepchrklzxawsm.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU');
 
   const [realTimeChannel, setRealTimeChannel] = useState(null);
   const maxDate = new Date();
@@ -151,14 +151,14 @@ function MainView({ setPage, page }) {
       setIsLoading(forLoading);
     }
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -181,13 +181,13 @@ function MainView({ setPage, page }) {
       setIsLoading(forLoading);
     }
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": 'https://ligqdgmwtziqytxyqpvv.supabase.co',
-          "supabase-key": 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8',
+          "supabase-url": 'https://srseiyeepchrklzxawsm.supabase.co',
+          "supabase-key": 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU',
         },
         body: JSON.stringify({
           user_id: userId,
@@ -281,14 +281,14 @@ function MainView({ setPage, page }) {
   ) => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/remove_requirements",
+      "https://donboscoapi.vercel.app/api/admission/remove_requirements",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           requirements_type: requirementType,
@@ -763,13 +763,13 @@ function MainView({ setPage, page }) {
 
         try {
           const fileUploadResponse = await fetch(
-            "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
+            "https://donboscoapi.vercel.app/api/admission/upload_requirements",
             {
               method: "POST",
               headers: {
-                "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+                "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
                 "supabase-key":
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
               },
               body: formData,
             }
@@ -1056,14 +1056,14 @@ function MainView({ setPage, page }) {
   const handleSlotCheck = async () => {
     setSlotsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/check_slot",
+      "https://donboscoapi.vercel.app/api/admission/check_slot",
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
       }
     );
@@ -1223,14 +1223,14 @@ function MainView({ setPage, page }) {
       revisedLevelString = "Grade 7 - 12";
     }*/
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/reserve_slot_exam",
+      "https://donboscoapi.vercel.app/api/admission/reserve_slot_exam",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           schedule_id: scheduleId,
@@ -1405,14 +1405,14 @@ function MainView({ setPage, page }) {
 
   const handlePersonalSubmission = async () => {
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_admission",
+      "https://donboscoapi.vercel.app/api/admission/create_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1448,14 +1448,14 @@ function MainView({ setPage, page }) {
 
   const handleAcademicSubmission = async () => {
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_academic_background",
+      "https://donboscoapi.vercel.app/api/admission/create_academic_background",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1489,14 +1489,14 @@ function MainView({ setPage, page }) {
     console.log(`LIST: ${JSON.stringify(listA)}`);
 
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_family_background_siblings",
+      "https://donboscoapi.vercel.app/api/admission/create_family_background_siblings",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1586,14 +1586,14 @@ function MainView({ setPage, page }) {
 
     console.log(`BACKID: ${backgroundSelected}`);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_family_background_parent",
+      "https://donboscoapi.vercel.app/api/admission/create_family_background_parent",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           background_id: parseInt(backgroundSelected),
@@ -1637,13 +1637,13 @@ function MainView({ setPage, page }) {
   
       // Send POST request
       const fileUploadResponse = await fetch(
-        "https://dbs-api-live.vercel.app/api/admission/create_special_concern",
+        "https://donboscoapi.vercel.app/api/admission/create_special_concern",
         {
           method: "POST",
           headers: {
-            "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+            "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
             "supabase-key":
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
           },
           body: formData,
         }
@@ -1674,14 +1674,14 @@ function MainView({ setPage, page }) {
   const handleSchedCancellation = async (easId, cancelReason) => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/cancel-schedule",
+      "https://donboscoapi.vercel.app/api/admission/cancel-schedule",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           eas_id: easId,
@@ -1704,14 +1704,14 @@ function MainView({ setPage, page }) {
   const handleSurveySubmission = async () => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_survey",
+      "https://donboscoapi.vercel.app/api/admission/create_survey",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1728,14 +1728,14 @@ function MainView({ setPage, page }) {
   const handleAgreementDeclaration = async () => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/accept_agreement",
+      "https://donboscoapi.vercel.app/api/admission/accept_agreement",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1778,14 +1778,14 @@ function MainView({ setPage, page }) {
     }*/
 
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/check_exam_schedule",
+      "https://donboscoapi.vercel.app/api/admission/check_exam_schedule",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           level_applying_for: revisedLevelString,
@@ -1819,14 +1819,14 @@ function MainView({ setPage, page }) {
     if (page == "main") {
     }
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -2133,14 +2133,14 @@ function MainView({ setPage, page }) {
 
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/register_admission",
+      "https://donboscoapi.vercel.app/api/admission/register_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -5329,7 +5329,7 @@ function MainView({ setPage, page }) {
                     >
                       Ok, got it!
                     </button>
-                    {/*<button
+                    <button
                       className="btn btn-red"
                       onClick={() => {
                         console.log("wahaha");
@@ -5339,7 +5339,7 @@ function MainView({ setPage, page }) {
                       }}
                     >
                       Reschedule
-                    </button>*/}
+                    </button>
                   </div>
                 </Modal.Body>
               </Modal>
