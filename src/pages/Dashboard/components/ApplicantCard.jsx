@@ -70,9 +70,9 @@ function ApplicantCard({
       if (isApplicationCreated && rejectCount > 0) {
         return { text: "Requirements - Rejected, revisions needed", color: "red" };
       }
-      else{
+      /*else{
         return { text: "Application - Awaiting approval", color: "blue" };
-      }
+      }*/
       
     }
   
