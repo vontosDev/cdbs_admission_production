@@ -80,7 +80,7 @@ function ApplicantCard({
     if (isApplicationCreated && isCompleteView) {
   
       if (pendingCount > 0 && rejectCount === 0) {
-        return { text: "Requirements - Awaiting approval1", color: "blue" };
+        return { text: "Requirements - Awaiting approval", color: "blue" };
       }
   
       if (rejectCount > 0) {
