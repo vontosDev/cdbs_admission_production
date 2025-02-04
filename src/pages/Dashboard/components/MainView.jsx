@@ -176,6 +176,12 @@ function MainView({ setPage, page }) {
     setIsLoading(false);
   };
 
+  //calculate date if difference is 2 days
+  const getDateDifferenceInDays = (date1, date2) => {
+    const diffTime = Math.abs(date2 - date1);
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Converts time difference to days
+  };
+
  /* const getUserAdmissions = async (forLoading) => {
     if (page === "main" || page === "upload") {
       setIsLoading(forLoading);
@@ -5154,18 +5160,6 @@ function MainView({ setPage, page }) {
           <Modal.Title>Applicant Information</Modal.Title>
         </Modal.Header> */}
                 <Modal.Body>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      await handleSchedCancellation(
-                        admissions["admissionsArr"][dataIndex][
-                          "db_admission_table"
-                        ]["db_exam_admission_schedule"][0]["eas_id"],
-                        cancelReasonString
-                      );
-                      setPage("main");
-                    }}
-                  >
                     <div className="payment-box">
                       {/* <img src={wallet} className="logo-verification" /> */}
                       <h1>Cancel this schedule?</h1>
@@ -5239,17 +5233,31 @@ function MainView({ setPage, page }) {
                       {/* <h2>{formData.email}</h2> */}
 
                       <hr className="line-container" />
-                      <button className="btn btn-blue">Cancel schedule</button>
+                      <button
+                        className="btn btn-blue"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          if (cancelReasonString.trim() !== "") {
+                            await handleSchedCancellation(
+                              admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
+                              cancelReasonString
+                            );
+                            setPage("main");
+                          }
+                        }}
+                        disabled={!cancelReasonString.trim()}
+                      >
+                        Cancel schedule
+                      </button>
                       <button
                         className="btn btn-grey"
                         onClick={() => {
                           setShowReschedModal(false);
                         }}
                       >
-                        Cancel
+                        Back
                       </button>
                     </div>
-                  </form>
                 </Modal.Body>
               </Modal>
             ) : null}
@@ -5329,7 +5337,7 @@ function MainView({ setPage, page }) {
                     >
                       Ok, got it!
                     </button>
-                    <button
+                    {/*<button
                       className="btn btn-red"
                       onClick={() => {
                         console.log("wahaha");
@@ -5339,7 +5347,34 @@ function MainView({ setPage, page }) {
                       }}
                     >
                       Reschedule
-                    </button>
+                    </button>*/
+                    
+                    (() => {
+                      const examDate = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["db_exam_schedule_table"]["exam_date"];
+                      const today = new Date();
+                      const examDateObj = new Date(examDate);
+                      
+                      // Calculate the difference in days
+                      const daysDifference = getDateDifferenceInDays(today, examDateObj);
+                      console.log(daysDifference);
+                      // Enable "Reschedule" button only if the difference is 2 days or less
+                      return (
+                        <button
+                          className="btn btn-red"
+                          onClick={() => {
+                            console.log("wahaha");
+                            setCancelReasonString("");
+                            setShowReschedModal((prev) => !prev);
+                          }}
+                          disabled={daysDifference !== 2} // Disable if more than 2 days difference
+                        >
+                          Reschedule
+                        </button>
+                      );
+                    })()
+              
+                    
+                    }
                   </div>
                 </Modal.Body>
               </Modal>
