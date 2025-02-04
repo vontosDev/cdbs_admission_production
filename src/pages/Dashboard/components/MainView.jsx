@@ -5519,7 +5519,7 @@ function MainView({ setPage, page }) {
               </div>
 
               <div className="schedules-container">
-                <span className="time-header">Time</span>
+                <span className="time-header">Timex</span>
                 <div className="schedule-lists">
                   {selectedDate === null ? (
                     <h2 className="time-no-date-header">
