@@ -58,6 +58,7 @@ function MainView({ setPage, page }) {
   const [uploadStatus, setUploadStatus] = useState("");
   const [edit, setEdit] = useState(false);
   const [dobHandled, setDobHandled] = useState(false);
+  
 
   
   const [requirements, setRequirements] = useState([
@@ -124,6 +125,45 @@ function MainView({ setPage, page }) {
   const [cities, setCities] = useState([]);
   const [selectedIdCity, setSelectedIdCity] = useState([]);
   const [baranggays, setBaranggays] = useState([]);
+
+
+  const checkExamStatus = (date, start_time, end_time) => {
+    const today = new Date();
+    const examDateObj = new Date(date); // Convert string date to Date object
+
+    // Check if the exam date is in the past
+    if (today > examDateObj) {
+      // If today is after the exam date, the exam has passed
+      return true;
+    }
+  
+    // Check if today is the exam date
+    if (today.toDateString() === examDateObj.toDateString()) {
+      const currentTime = new Date();
+  
+      // Convert start_time and end_time to Date objects for comparison
+      const [startHour, startMinutePart] = start_time.split(":");
+      const startMinute = startMinutePart.split(" ")[0]; // Get minute part before AM/PM
+      const startPeriod = startMinutePart.split(" ")[1]; // Get AM/PM
+  
+      const [endHour, endMinutePart] = end_time.split(":");
+      const endMinute = endMinutePart.split(" ")[0]; // Get minute part before AM/PM
+      const endPeriod = endMinutePart.split(" ")[1]; // Get AM/PM
+  
+      // Convert to 24-hour format (for both start_time and end_time)
+      const startHour24 = startPeriod === "PM" ? parseInt(startHour) + 12 : parseInt(startHour);
+      const endHour24 = endPeriod === "PM" ? parseInt(endHour) + 12 : parseInt(endHour);
+  
+      const startTimeObj = new Date(currentTime.setHours(startHour24, startMinute, 0, 0));
+      const endTimeObj = new Date(currentTime.setHours(endHour24, endMinute, 0, 0));
+  
+      // Return true if the current time is past the exam's end time, meaning the exam has passed
+      return currentTime > endTimeObj;
+    }
+  
+    return false; // Return false if it's not the exam date
+  };
+  
   
   const userId = localStorage.getItem("userId");
 
@@ -306,6 +346,8 @@ function MainView({ setPage, page }) {
     getUserAdmissions(false);
     console.log(await response.json());
   };
+
+  console.log(dataIndex)
 
   const getLengthRequirements = () => {
     const levelApplyingFor =
@@ -937,6 +979,7 @@ function MainView({ setPage, page }) {
       available: false,
     },
   ]);
+  
 
   const [personalData, setPersonalData] = useState({
     levelApplyingFor: "",
@@ -2474,6 +2517,8 @@ function MainView({ setPage, page }) {
     console.log(decodedUser);
     setUser(decodedUser);
   };
+
+  
 
   useEffect(() => {
     if (user["registryType"] === "learner") {
@@ -5276,11 +5321,32 @@ function MainView({ setPage, page }) {
               >
                 {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
-        </Modal.Header> */}
+        </Modal.Header> */
+        
+        }
                 <Modal.Body>
                   <div className="payment-box">
                     {/* <img src={wallet} className="logo-verification" /> */}
-                    <h1>Your Assessment Exam Schedule:</h1>
+                    <h1>{checkExamStatus(admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]?.["db_exam_admission_schedule"]?.[0]?.[
+                          "db_exam_schedule_table"
+                        ]?.["exam_date"], convertMilitaryToAMPM(
+                          admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "db_exam_schedule_table"
+                          ]?.["start_time"] ?? ""
+                        ),convertMilitaryToAMPM(
+                          admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "db_exam_schedule_table"
+                          ]?.["end_time"] ?? ""
+                        ))?
+                    'Your Schedule Assessment is already done':'Your Assessment Exam Schedule'
+                    }
+                    </h1>
                     <h3>
                       Date:{" "}
                       <strong>
