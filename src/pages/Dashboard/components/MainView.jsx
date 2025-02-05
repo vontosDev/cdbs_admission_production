@@ -130,7 +130,8 @@ function MainView({ setPage, page }) {
   const checkExamStatus = (date, start_time, end_time) => {
     const today = new Date();
     const examDateObj = new Date(date); // Convert string date to Date object
-
+    today.setHours(0, 0, 0, 0);
+    examDateObj.setHours(0, 0, 0, 0);
     // Check if the exam date is in the past
     if (today > examDateObj) {
       // If today is after the exam date, the exam has passed

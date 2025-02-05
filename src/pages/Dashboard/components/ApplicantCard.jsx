@@ -98,8 +98,10 @@ function ApplicantCard({
       return { text: "Assessment Exam - Ready to proceed", color: "yellow" };
     }
 
-    if(examSchedCount>0 && !isAssess){
-      return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+    if(isPaid && examSchedCount>0){
+      if(!isAssess){
+        return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+      }
     }
 
     if(isAssess && !isResult){
