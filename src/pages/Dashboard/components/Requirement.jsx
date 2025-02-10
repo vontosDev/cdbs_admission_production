@@ -320,25 +320,6 @@ function Requirement({
               </>
             ) : null}
 
-            {/*fileNames.map((el, i) => (
-              <div className="item-upload" key={i}>
-                <h2 className="file-text">{el}</h2>
-                <span
-                  className="delete-upload-item"
-                  onClick={() => {
-                    setFiles((prevFiles) =>
-                      prevFiles.filter((el) => el !== el.name[i])
-                    );
-                    setFileNames((prevFiles) =>
-                      prevFiles.filter((elFile) => elFile !== el)
-                    );
-                    handleFileChange(type, files);
-                  }}
-                >
-                  X
-                </span>
-              </div>
-            ))*/}
             {fileNames.map((el, i) => (
               <div className="item-upload" key={i}>
                 <h2 className="file-text">{el}</h2>
@@ -364,54 +345,6 @@ function Requirement({
               </div>
             ))}
 
-
-
-            {/*mainTitle != "Recommendation Letter"
-              ? uploadedFiles.map((el, i) => (
-                  <div className="upload-view-btn-container" key={i}>
-                    <a
-                      id="view-upload"
-                      href={
-                        Array.isArray(el.document_url)
-                          ? el.document_url[0]
-                          : el.document_url.replace(/[\[\]"']/g, "")
-                      }
-                      key={i}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="btn-view">
-                        <img src={showEye} /> Uploaded File
-                      </span>
-                    </a>
-                    <button
-                      className="close-btn"
-                      onClick={async () => {
-                        var result = await Swal.fire({
-                          title: "Delete this uploaded file?",
-                          icon: "warning",
-                          showCancelButton: true,
-                          confirmButtonText: "Yes",
-                          cancelButtonColor: "No",
-                        });
-                        if (result.isConfirmed) {
-                          await handleDeleteUploadedFiles(
-                            el.requirements_type,
-                            el.admission_id,
-                            el.required_doc_id
-                          );
-
-                          fetchAdmissions();
-                        } else {
-                          return;
-                        }
-                      }} // Function to remove file
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))
-              : null*/}
 
               {mainTitle !== "Recommendation Letter"
                 ? uploadedFiles.map((el, i) => (
@@ -540,7 +473,7 @@ function Requirement({
                         const formData = new FormData();
                         const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
                         formData.append("admission_id",admissionId);
-                        formData.append("requirements_type",5);
+                        formData.append("requirements_type",15);
                         const fileUploadResponse = await fetch(
                           "https://donboscoapi.vercel.app/api/admission/upload_requirements",
                           {
@@ -586,31 +519,6 @@ function Requirement({
           </div>
         </div>
       </div>
-
-      {/*mainTitle != "Recommendation Letter" && uploadedFiles.length ==0 ? (
-        <div className="attachment-icon">
-          <input
-            ref={hiddenFileInput}
-            className="attach" style={{ marginTop: "70px", marginBottom: "70px"  }}
-            type="file"
-            accept=".png, .jpeg, .jpg, .pdf"
-            multiple
-            onChange={(e) => {
-              const files = Array.from(e.target.files);
-              if (handleFileChange(type, files)) {
-                setFileNames(files.map((file) => file.name) || null);
-              }
-            }}
-          />
-
-          <img
-            className="attachment-icon-button"
-            src={attachment}
-            onClick={handleClick}
-          />
-        </div>
-      ) : null*/
-      }
 
       {mainTitle !== "Recommendation Letter" && (
         (uploadedFiles.length === 0 || uploadedFiles.some((file) => file.document_status === "rejected")) && (
