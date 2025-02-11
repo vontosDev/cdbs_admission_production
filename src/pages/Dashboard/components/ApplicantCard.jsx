@@ -70,9 +70,6 @@ function ApplicantCard({
       if (isApplicationCreated && rejectCount > 0) {
         return { text: "Requirements - Rejected, revisions needed", color: "red" };
       }
-      /*else{
-        return { text: "Application - Awaiting approval", color: "blue" };
-      }*/
       
     }
   
@@ -101,22 +98,25 @@ function ApplicantCard({
       return { text: "Assessment Exam - Ready to proceed", color: "yellow" };
     }
 
-    if(examSchedCount>0 && !isAssess){
-      return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+    if(isPaid && examSchedCount>0){
+      if(!isAssess){
+        return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+      }
     }
 
     if(isAssess && !isResult){
       return { text: "Results - Awaiting approval", color: "blue" };
     }
 
-    if(isResult){
-      if(isPassed){
-        return { text: "Results - Passed", color: "green" };
-      }else{
-        return { text: "Results - Failed", color: "red" };
-      }
+    if(isResult && isPassed){
+      return { text: "Results - Passed", color: "green" };
     }
 
+    if(!isPassed){
+      return { text: "Results - Failed", color: "red" };
+    }
+    
+  
     // Default case
     return { text: "Application - Ready to proceed", color: "yellow" };
   };

@@ -58,7 +58,17 @@ function MainView({ setPage, page }) {
   const [uploadStatus, setUploadStatus] = useState("");
   const [edit, setEdit] = useState(false);
   const [dobHandled, setDobHandled] = useState(false);
+  
+  const [downloadedFiles, setDownloadedFiles] = useState({
+    recoLetter: { teacher: false, schoolHead: false },
+    nonCatholicWaiver: false,
+    parentQuestionnaire: false,
+  });
 
+
+  
+  
+  
   
   const [requirements, setRequirements] = useState([
     { type: "birthCert", file: [] },
@@ -97,6 +107,11 @@ function MainView({ setPage, page }) {
     date: "",
   });
 
+
+
+  
+  
+
   const [showReschedModal, setShowReschedModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [declarationPackage, setDeclarationPackage] = useState(false);
@@ -124,6 +139,46 @@ function MainView({ setPage, page }) {
   const [cities, setCities] = useState([]);
   const [selectedIdCity, setSelectedIdCity] = useState([]);
   const [baranggays, setBaranggays] = useState([]);
+
+
+  const checkExamStatus = (date, start_time, end_time) => {
+    const today = new Date();
+    const examDateObj = new Date(date); // Convert string date to Date object
+    today.setHours(0, 0, 0, 0);
+    examDateObj.setHours(0, 0, 0, 0);
+    // Check if the exam date is in the past
+    if (today > examDateObj) {
+      // If today is after the exam date, the exam has passed
+      return true;
+    }
+  
+    // Check if today is the exam date
+    if (today.toDateString() === examDateObj.toDateString()) {
+      const currentTime = new Date();
+  
+      // Convert start_time and end_time to Date objects for comparison
+      const [startHour, startMinutePart] = start_time.split(":");
+      const startMinute = startMinutePart.split(" ")[0]; // Get minute part before AM/PM
+      const startPeriod = startMinutePart.split(" ")[1]; // Get AM/PM
+  
+      const [endHour, endMinutePart] = end_time.split(":");
+      const endMinute = endMinutePart.split(" ")[0]; // Get minute part before AM/PM
+      const endPeriod = endMinutePart.split(" ")[1]; // Get AM/PM
+  
+      // Convert to 24-hour format (for both start_time and end_time)
+      const startHour24 = startPeriod === "PM" ? parseInt(startHour) + 12 : parseInt(startHour);
+      const endHour24 = endPeriod === "PM" ? parseInt(endHour) + 12 : parseInt(endHour);
+  
+      const startTimeObj = new Date(currentTime.setHours(startHour24, startMinute, 0, 0));
+      const endTimeObj = new Date(currentTime.setHours(endHour24, endMinute, 0, 0));
+  
+      // Return true if the current time is past the exam's end time, meaning the exam has passed
+      return currentTime > endTimeObj;
+    }
+  
+    return false; // Return false if it's not the exam date
+  };
+  
   
   const userId = localStorage.getItem("userId");
 
@@ -174,6 +229,12 @@ function MainView({ setPage, page }) {
       };
     });
     setIsLoading(false);
+  };
+
+  //calculate date if difference is 2 days
+  const getDateDifferenceInDays = (date1, date2) => {
+    const diffTime = Math.abs(date2 - date1);
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Converts time difference to days
   };
 
  /* const getUserAdmissions = async (forLoading) => {
@@ -301,6 +362,8 @@ function MainView({ setPage, page }) {
     console.log(await response.json());
   };
 
+  console.log(dataIndex)
+
   const getLengthRequirements = () => {
     const levelApplyingFor =
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -341,7 +404,7 @@ function MainView({ setPage, page }) {
     if (religion != "Roman Catholic") {
       requirementSet.push("non-catholic-waiver");
     }
-    console.log(requirementSet.length);
+    console.log(`this the ${requirementSet.length}`);
     console.log(`REQ: ${requirementSet}`);
     return requirementSet.length;
   };
@@ -931,6 +994,7 @@ function MainView({ setPage, page }) {
       available: false,
     },
   ]);
+  
 
   const [personalData, setPersonalData] = useState({
     levelApplyingFor: "",
@@ -1813,6 +1877,75 @@ function MainView({ setPage, page }) {
     setIsLoading(false);
   };
 
+  // Function to check if required files are downloaded
+  const areRequiredFilesDownloaded = () => {
+    const { recoLetter, nonCatholicWaiver, parentQuestionnaire } = downloadedFiles;
+    // Check if required files are downloaded
+    
+    const isParentAndWaiverDownloaded = parentQuestionnaire && nonCatholicWaiver;
+    const isRecoLetterComplete = recoLetter.teacher && recoLetter.schoolHead;
+    const isNonCatholicOnly = nonCatholicWaiver && !parentQuestionnaire && !isRecoLetterComplete;
+    const isParentOnly = parentQuestionnaire && !nonCatholicWaiver && !isRecoLetterComplete;
+    if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+      "religion"
+    ] != "Roman Catholic"){
+      return (
+        isParentAndWaiverDownloaded || // Parent Questionnaire only (if no other requirement exists)
+        (isRecoLetterComplete && nonCatholicWaiver) // Both reco letters + non-Catholic waiver
+      );
+    }else{
+      if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "level_applying_for"
+      ] == "Kinder" ||
+      admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "level_applying_for"
+      ] == "Pre-Kinder"){
+        return (
+          isParentOnly
+        );
+      }else{
+        return (
+          isRecoLetterComplete
+        );
+      }
+    }
+    
+  };
+
+
+  const getRequiredDocumentsCount = (level_applying_for, religion, citizenship) => {
+    if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder") {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 5;
+      } else {
+        return 4;
+      }
+    } else if (level_applying_for === "Grade 1") {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 7;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
+        return 5;
+      } else {
+        return 4;
+      }
+    } else {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 8;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 7;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
+        return 6;
+      } else {
+        return 4;
+      }
+    }
+  };
+
+
   const getAdmissionData = async () => {
     setIsLoading(true);
     console.log(`SELECTED: ${admissionSelected}`);
@@ -1868,6 +2001,10 @@ function MainView({ setPage, page }) {
         handleFetchBaranggays(city);
         barangay = addressArr[1];
       }
+
+
+
+      
 
       return {
         levelApplyingFor:
@@ -2468,6 +2605,7 @@ function MainView({ setPage, page }) {
     console.log(decodedUser);
     setUser(decodedUser);
   };
+
 
   useEffect(() => {
     if (user["registryType"] === "learner") {
@@ -4903,6 +5041,8 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(1)}
+                setDownloadedFiles={setDownloadedFiles}
+                downloadedFiles={downloadedFiles}
               />
               <Requirement
                 fetchAdmissions={getUserAdmissions}
@@ -4915,6 +5055,8 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(2)}
+                setDownloadedFiles={setDownloadedFiles}
+                downloadedFiles={downloadedFiles}
               />
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
                 "level_applying_for"
@@ -4934,6 +5076,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(4)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles}
                   />
                 </>
               ) : (
@@ -4952,6 +5096,8 @@ function MainView({ setPage, page }) {
                       requirements={requirements}
                       handleRequirements={setRequirements}
                       isRejected={requirementsRejectedArr.includes(3)}
+                      setDownloadedFiles={setDownloadedFiles}
+                      downloadedFiles={downloadedFiles} 
                     />
                   ) : null}
                   <Requirement
@@ -4965,6 +5111,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(14)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -4975,6 +5123,8 @@ function MainView({ setPage, page }) {
                     fileText={"file_name.jpg/png/pdf"}
                     requirements={requirements}
                     handleRequirements={setRequirements}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                 </>
               )}
@@ -4993,6 +5143,8 @@ function MainView({ setPage, page }) {
                   requirements={requirements}
                   handleRequirements={setRequirements}
                   isRejected={requirementsRejectedArr.includes(13)}
+                  setDownloadedFiles={setDownloadedFiles}
+                  downloadedFiles={downloadedFiles} 
                 />
               ) : null}
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -5010,6 +5162,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(11)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -5022,20 +5176,36 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(12)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                 </>
               ) : null}
             </div>
             <div className="upload-btn-container">
-              {edit ? (
+              {
+              
+              edit ? (
+                
                 <button
-                  className={`${
-                    requirements.filter((el) => el.file.length > 0).length == 0
+                  className={`${ !areRequiredFilesDownloaded() &&
+                    requirements.filter((el) => el.file.length > 0).length == getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                      "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                        "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                          "citizenship"])
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={() => {
-                    handleUpload(requirements);
+                    if (areRequiredFilesDownloaded()) {
+                      handleUpload(requirements);
+                    } else {
+                      Swal.fire({
+                        title: "Required files not downloaded",
+                        text: "Please download all necessary files before uploading.",
+                        icon: "error",
+                      });
+                    }
                   }}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
@@ -5045,16 +5215,13 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${
-                    requirements.filter((el) => el.file.length > 0).length ==
-                      0 ||
-                    getLengthRequirements() !=
-                      requirements.filter((rqmt) => rqmt.file.length > 0).length
+                  className={`${ !areRequiredFilesDownloaded()
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={
-                    requirements.filter((el) => el.file.length > 0).length ==
+                    
+                    areRequiredFilesDownloaded() && requirements.filter((el) => el.file.length > 0).length ==
                       0 ||
                     getLengthRequirements() !=
                       requirements.filter((rqmt) => rqmt.file.length > 0).length
@@ -5154,18 +5321,6 @@ function MainView({ setPage, page }) {
           <Modal.Title>Applicant Information</Modal.Title>
         </Modal.Header> */}
                 <Modal.Body>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      await handleSchedCancellation(
-                        admissions["admissionsArr"][dataIndex][
-                          "db_admission_table"
-                        ]["db_exam_admission_schedule"][0]["eas_id"],
-                        cancelReasonString
-                      );
-                      setPage("main");
-                    }}
-                  >
                     <div className="payment-box">
                       {/* <img src={wallet} className="logo-verification" /> */}
                       <h1>Cancel this schedule?</h1>
@@ -5239,17 +5394,31 @@ function MainView({ setPage, page }) {
                       {/* <h2>{formData.email}</h2> */}
 
                       <hr className="line-container" />
-                      <button className="btn btn-blue">Cancel schedule</button>
+                      <button
+                        className="btn btn-blue"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          if (cancelReasonString.trim() !== "") {
+                            await handleSchedCancellation(
+                              admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
+                              cancelReasonString
+                            );
+                            setPage("main");
+                          }
+                        }}
+                        disabled={!cancelReasonString.trim()}
+                      >
+                        Cancel schedule
+                      </button>
                       <button
                         className="btn btn-grey"
                         onClick={() => {
                           setShowReschedModal(false);
                         }}
                       >
-                        Cancel
+                        Back
                       </button>
                     </div>
-                  </form>
                 </Modal.Body>
               </Modal>
             ) : null}
@@ -5268,11 +5437,36 @@ function MainView({ setPage, page }) {
               >
                 {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
-        </Modal.Header> */}
+        </Modal.Header> */
+        
+        }
                 <Modal.Body>
                   <div className="payment-box">
                     {/* <img src={wallet} className="logo-verification" /> */}
-                    <h1>Your Assessment Exam Schedule:</h1>
+                    <h1>{checkExamStatus(admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]?.["db_exam_admission_schedule"]?.[0]?.[
+                          "db_exam_schedule_table"
+                        ]?.["exam_date"], convertMilitaryToAMPM(
+                          admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "db_exam_schedule_table"
+                          ]?.["start_time"] ?? ""
+                        ),convertMilitaryToAMPM(
+                          admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "db_exam_schedule_table"
+                          ]?.["end_time"] ?? ""
+                        ))?
+                        admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]["db_exam_admission_schedule"][0][
+                          "is_attended"]==true?
+                    'Your Schedule Assessment is already done':'Your Schedule Assessment was not attended. Please reschedule if needed.':'Your Assessment Exam Schedule'
+                    }
+                    </h1>
                     <h3>
                       Date:{" "}
                       <strong>
@@ -5329,7 +5523,7 @@ function MainView({ setPage, page }) {
                     >
                       Ok, got it!
                     </button>
-                    <button
+                    {/*<button
                       className="btn btn-red"
                       onClick={() => {
                         console.log("wahaha");
@@ -5339,7 +5533,34 @@ function MainView({ setPage, page }) {
                       }}
                     >
                       Reschedule
-                    </button>
+                    </button>*/
+                    
+                    (() => {
+                      const examDate = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["db_exam_schedule_table"]["exam_date"];
+                      const today = new Date();
+                      const examDateObj = new Date(examDate);
+                      
+                      // Calculate the difference in days
+                      const daysDifference = getDateDifferenceInDays(today, examDateObj);
+                      console.log(daysDifference);
+                      // Enable "Reschedule" button only if the difference is 2 days or less
+                      return (
+                        <button
+                          className="btn btn-red"
+                          onClick={() => {
+                            console.log("wahaha");
+                            setCancelReasonString("");
+                            setShowReschedModal((prev) => !prev);
+                          }}
+                          disabled={daysDifference !== 2} // Disable if more than 2 days difference
+                        >
+                          Reschedule
+                        </button>
+                      );
+                    })()
+              
+                    
+                    }
                   </div>
                 </Modal.Body>
               </Modal>
@@ -5451,13 +5672,13 @@ function MainView({ setPage, page }) {
                   <img src={back} onClick={() => setPage("main")} />
                   <h1>Assessment Exam Schedules</h1>
                 </div>
-                <button
+                {/*<button
                   className="btn-blue btn btn-add"
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Confirm
-                </button>
+                </button>*/}
               </div>
             </div>
             <div className="select-sched-container">
