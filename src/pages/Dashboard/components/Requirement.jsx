@@ -545,7 +545,7 @@ function Requirement({
               className="attachment-icon-button"
               src={attachment}
               onClick={handleClick}
-              hidden={type==='parentQuestionnaire'|| type==='nonCatholicWaiver'?true:!downloadedFiles[type]}
+              hidden={type==='parentQuestionnaire'|| type==='nonCatholicWaiver'?!downloadedFiles[type]:false}
             />
           </div>
         )
