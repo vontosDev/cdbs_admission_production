@@ -151,7 +151,7 @@ function Requirement({
     return true;
   };
 
-  const handleClick = (event) => {
+  const handleClick=(type)= (event) => {
       if (!downloadedFiles[type]) return;
       hiddenFileInput.current.click();
   };
@@ -162,9 +162,9 @@ function Requirement({
         return { ...prev, recoLetter: { ...prev.recoLetter, teacher: true } };
       } else if (type === 15) {
         return { ...prev, recoLetter: { ...prev.recoLetter, schoolHead: true } };
-      } else if (type === "non-catholic-waiver") {
+      } else if (type === "nonCatholicWaiver") {
         return { ...prev, nonCatholicWaiver: true };
-      } else if (type === "parent-questionaire") {
+      } else if (type === "parentQuestionnaire") {
         return { ...prev, parentQuestionnaire: true };
       }
       return prev;
@@ -476,7 +476,7 @@ function Requirement({
                 <button
                   className="btn-blue btn btn-add"
                   style={{ width: "230px" }}
-                  onClick={(e) => handleDownload(e, "parent-questionaire", parentQuestionnaire)}
+                  onClick={(e) => handleDownload(e, "parentQuestionnaire", parentQuestionnaire)}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
@@ -510,7 +510,7 @@ function Requirement({
                 <button
                   className="btn-blue btn btn-add reco-pad-left"
                   style={{ width: "230px" }}
-                  onClick={(e) => handleDownload(e, "non-catholic-waiver", nonCatholicWaiver)}
+                  onClick={(e) => handleDownload(e, "nonCatholicWaiver", nonCatholicWaiver)}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
@@ -545,7 +545,7 @@ function Requirement({
               className="attachment-icon-button"
               src={attachment}
               onClick={handleClick}
-              hidden={!downloadedFiles[type]}
+              hidden={type==='parentQuestionnaire'|| type==='nonCatholicWaiver'?true:!downloadedFiles[type]}
             />
           </div>
         )
