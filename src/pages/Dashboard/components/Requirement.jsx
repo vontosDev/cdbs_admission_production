@@ -152,7 +152,9 @@ function Requirement({
   };
 
   const handleClick=(type)= (event) => {
+    if(type==='parentQuestionnaire' || type==='nonCatholicWaiver'){
       if (!downloadedFiles[type]) return;
+    }
       hiddenFileInput.current.click();
   };
 
