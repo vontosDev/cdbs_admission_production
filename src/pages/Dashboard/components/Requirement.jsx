@@ -19,6 +19,7 @@ function Requirement({
   dataIndex,
   handleRequirements,
   isRejected,
+  setDownloadedFiles
 }) {
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
@@ -150,6 +151,72 @@ function Requirement({
   const handleClick = (event) => {
     hiddenFileInput.current.click();
   };
+
+  const markFileAsDownloaded = (type) => {
+    setDownloadedFiles((prev) => {
+      if (type === 5) {
+        return { ...prev, recoLetter: { ...prev.recoLetter, teacher: true } };
+      } else if (type === 15) {
+        return { ...prev, recoLetter: { ...prev.recoLetter, schoolHead: true } };
+      } else if (type === "nonCatholicWaiver") {
+        return { ...prev, nonCatholicWaiver: true };
+      } else if (type === "parentQuestionnaire") {
+        return { ...prev, parentQuestionnaire: true };
+      }
+      return prev;
+    });
+  };
+  
+  
+  const handleDownload = async (e, type, fileUrl) => {
+    e.preventDefault();
+    if (isPendingOrAccepted || !fileUrl) return;
+  
+    try {
+      const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
+      const formData = new FormData();
+      formData.append("admission_id", admissionId);
+      formData.append("requirements_type", type.toString());
+  
+      const fileUploadResponse = await fetch(
+        "https://donboscoapi.vercel.app/api/admission/upload_requirements",
+        {
+          method: "POST",
+          headers: {
+            "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+            "supabase-key": "YOUR_SUPABASE_KEY_HERE",
+          },
+          body: formData,
+        }
+      );
+  
+      console.log(await fileUploadResponse.json());
+      fetchAdmissions();
+  
+      // Mark the file as downloaded
+      markFileAsDownloaded(type);
+  
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download =
+        type === 5
+          ? "recommendation-teacher.pdf"
+          : type === 15
+          ? "recommendation-school-head-counselor.pdf"
+          : `${type}.pdf`;
+  
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+  
+  
+  
+  
+  
 
   return (
     <div
@@ -399,122 +466,51 @@ function Requirement({
 
           <div className="align-buttons-self">
             {mainTitle === "Parent Questionnaire" ? (
-              <a href={parentQuestionnaire} download="parent-questionnaire">
+              //<a href={parentQuestionnaire} download="parent-questionnaire">
                 <button
                   className="btn-blue btn btn-add"
                   style={{ width: "230px" }}
+                  onClick={(e) => handleDownload(e, "parent-questionaire", parentQuestionnaire)}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Download Questionnaire
                 </button>
-              </a>
+              //</a>
               
             ) : null}
-            {mainTitle === "Recommendation Letter" ? (
-              <a href={recommendTeacher} download="recommendation-teacher">
-                <button
-                  className={`btn-blue btn btn-add ${isPendingOrAccepted ? "disabled" : ""}`}
-                  style={{ width: "295px" }}
-                  onClick={async (e) => {
-                    //e.preventDefault();
-                    if(isPendingOrAccepted){
-                      e.preventDefault();
-                    }else{
-                      try{
-                        const formData = new FormData();
-                        const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
-                        formData.append("admission_id",admissionId);
-                        formData.append("requirements_type",5);
-                        const fileUploadResponse = await fetch(
-                          "https://donboscoapi.vercel.app/api/admission/upload_requirements",
-                          {
-                            method: "POST",
-                            headers: {
-                              "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
-                              "supabase-key":
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
-                            },
-                            body: formData,
-                          }
-                        );
-                
-                        // Log the response for debugging purposes
-                        console.log(await fileUploadResponse.json());
-                        fetchAdmissions();
-                      }catch (error) {
-                        console.error("Error uploading file:", error);
-                      }
-                    }
-                    
-              
-                  }
-                }
-                  // onClick={addApplicant}
-                  // onClick={() => setPage("personal-form")}
-                >
-                  Download Class Adviser or Subject Teacher
-                </button>
-              </a>
-            ) : null}
-            {mainTitle === "Recommendation Letter" ? (
-              <a
-                href={recommendSchoolHead}
-                download="recommendation-school-head-counselor"
-              >
-                <button
-                  className={`btn-blue btn btn-add reco-pad-left ${isPendingOrAccepted ? "disabled" : ""}`}
-                  style={{ width: "290px" }}
-                  onClick={async (e) => {
-                    if(isPendingOrAccepted){
-                      e.preventDefault();
-                    }else{
-                      try{
-                        const formData = new FormData();
-                        const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
-                        formData.append("admission_id",admissionId);
-                        formData.append("requirements_type",15);
-                        const fileUploadResponse = await fetch(
-                          "https://donboscoapi.vercel.app/api/admission/upload_requirements",
-                          {
-                            method: "POST",
-                            headers: {
-                              "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
-                              "supabase-key":
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
-                            },
-                            body: formData,
-                          }
-                        );
-                
-                        // Log the response for debugging purposes
-                        console.log(await fileUploadResponse.json());
-                        fetchAdmissions();
-                      }catch (error) {
-                        console.error("Error uploading file:", error);
-                      }
-                    }
-              
-                  }
-                }
-                  // onClick={addApplicant}
-                  // onClick={() => setPage("personal-form")}
-                >
-                  Download School Head or Counselor
-                </button>
-              </a>
-            ) : null}
+            {mainTitle === "Recommendation Letter" && (
+                <>
+                  <button
+                    className={`btn-blue btn btn-add ${isPendingOrAccepted ? "disabled" : ""}`}
+                    style={{ width: "295px" }}
+                    onClick={(e) => handleDownload(e, 5, recommendTeacher)}
+                  >
+                    Download Class Adviser or Subject Teacher
+                  </button>
+
+                  <button
+                    className={`btn-blue btn btn-add reco-pad-left ${isPendingOrAccepted ? "disabled" : ""}`}
+                    style={{ width: "290px" }}
+                    onClick={(e) => handleDownload(e, 15, recommendSchoolHead)}
+                  >
+                    Download School Head or Counselor
+                  </button>
+                </>
+              )
+              }
             {mainTitle === "Non-Catholic Waiver" ? (
-              <a href={nonCatholicWaiver} download="non-catholic-waiver">
+              //<a href={nonCatholicWaiver} download="non-catholic-waiver">
                 <button
                   className="btn-blue btn btn-add reco-pad-left"
                   style={{ width: "230px" }}
+                  onClick={(e) => handleDownload(e, "non-catholic-waiver", nonCatholicWaiver)}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Download Non-Catholic Waiver
                 </button>
-              </a>
+              //</a>
             ) : null}
           </div>
         </div>

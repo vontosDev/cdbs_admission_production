@@ -59,7 +59,27 @@ function MainView({ setPage, page }) {
   const [edit, setEdit] = useState(false);
   const [dobHandled, setDobHandled] = useState(false);
   
+  const [downloadedFiles, setDownloadedFiles] = useState({
+    recoLetter: { teacher: false, schoolHead: false },
+    nonCatholicWaiver: false,
+    parentQuestionnaire: false,
+  });
 
+
+  
+  // Function to check if required files are downloaded
+  const areRequiredFilesDownloaded = () => {
+    const { recoLetter, nonCatholicWaiver, parentQuestionnaire } = downloadedFiles;
+    
+    // Define required file combinations
+    return (
+      (parentQuestionnaire) || // Only parent-questionnaire
+      (parentQuestionnaire && nonCatholicWaiver) || // Parent + Non-Catholic
+      (recoLetter.teacher && recoLetter.schoolHead) || // Both recommendation letters
+      (nonCatholicWaiver) || // Only Non-Catholic Waiver
+      (recoLetter.teacher && recoLetter.schoolHead && nonCatholicWaiver) // Both + Non-Catholic
+    );
+  };
   
   const [requirements, setRequirements] = useState([
     { type: "birthCert", file: [] },
@@ -2519,7 +2539,6 @@ function MainView({ setPage, page }) {
     setUser(decodedUser);
   };
 
-  
 
   useEffect(() => {
     if (user["registryType"] === "learner") {
@@ -4955,6 +4974,7 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(1)}
+                setDownloadedFiles={setDownloadedFiles} 
               />
               <Requirement
                 fetchAdmissions={getUserAdmissions}
@@ -4967,6 +4987,7 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(2)}
+                setDownloadedFiles={setDownloadedFiles} 
               />
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
                 "level_applying_for"
@@ -4986,6 +5007,7 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(4)}
+                    setDownloadedFiles={setDownloadedFiles} 
                   />
                 </>
               ) : (
@@ -5004,6 +5026,7 @@ function MainView({ setPage, page }) {
                       requirements={requirements}
                       handleRequirements={setRequirements}
                       isRejected={requirementsRejectedArr.includes(3)}
+                      setDownloadedFiles={setDownloadedFiles} 
                     />
                   ) : null}
                   <Requirement
@@ -5017,6 +5040,7 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(14)}
+                    setDownloadedFiles={setDownloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -5027,6 +5051,7 @@ function MainView({ setPage, page }) {
                     fileText={"file_name.jpg/png/pdf"}
                     requirements={requirements}
                     handleRequirements={setRequirements}
+                    setDownloadedFiles={setDownloadedFiles} 
                   />
                 </>
               )}
@@ -5045,6 +5070,7 @@ function MainView({ setPage, page }) {
                   requirements={requirements}
                   handleRequirements={setRequirements}
                   isRejected={requirementsRejectedArr.includes(13)}
+                  setDownloadedFiles={setDownloadedFiles} 
                 />
               ) : null}
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -5062,6 +5088,7 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(11)}
+                    setDownloadedFiles={setDownloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -5074,20 +5101,32 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(12)}
+                    setDownloadedFiles={setDownloadedFiles} 
                   />
                 </>
               ) : null}
             </div>
             <div className="upload-btn-container">
-              {edit ? (
+              {
+              
+              edit ? (
+                
                 <button
-                  className={`${
+                  className={`${ areRequiredFilesDownloaded() &&
                     requirements.filter((el) => el.file.length > 0).length == 0
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={() => {
-                    handleUpload(requirements);
+                    if (areRequiredFilesDownloaded()) {
+                      handleUpload(requirements);
+                    } else {
+                      Swal.fire({
+                        title: "Required files not downloaded",
+                        text: "Please download all necessary files before uploading.",
+                        icon: "error",
+                      });
+                    }
                   }}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
@@ -5097,16 +5136,13 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${
-                    requirements.filter((el) => el.file.length > 0).length ==
-                      0 ||
-                    getLengthRequirements() !=
-                      requirements.filter((rqmt) => rqmt.file.length > 0).length
+                  className={`${ !areRequiredFilesDownloaded()
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={
-                    requirements.filter((el) => el.file.length > 0).length ==
+                    
+                    areRequiredFilesDownloaded() && requirements.filter((el) => el.file.length > 0).length ==
                       0 ||
                     getLengthRequirements() !=
                       requirements.filter((rqmt) => rqmt.file.length > 0).length
