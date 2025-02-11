@@ -404,7 +404,7 @@ function MainView({ setPage, page }) {
     if (religion != "Roman Catholic") {
       requirementSet.push("non-catholic-waiver");
     }
-    console.log(requirementSet.length);
+    console.log(`this the ${requirementSet.length}`);
     console.log(`REQ: ${requirementSet}`);
     return requirementSet.length;
   };
@@ -1887,8 +1887,8 @@ function MainView({ setPage, page }) {
     const isNonCatholicOnly = nonCatholicWaiver && !parentQuestionnaire && !isRecoLetterComplete;
     const isParentOnly = parentQuestionnaire && !nonCatholicWaiver && !isRecoLetterComplete;
     if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
-      "citizenship"
-    ] != "Filipino"){
+      "religion"
+    ] != "Roman Catholic"){
       return (
         isParentAndWaiverDownloaded || // Parent Questionnaire only (if no other requirement exists)
         (isRecoLetterComplete && nonCatholicWaiver) // Both reco letters + non-Catholic waiver
@@ -1910,6 +1910,39 @@ function MainView({ setPage, page }) {
       }
     }
     
+  };
+
+
+  const getRequiredDocumentsCount = (level_applying_for, religion, citizenship) => {
+    if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder") {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 5;
+      } else {
+        return 4;
+      }
+    } else if (level_applying_for === "Grade 1") {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 7;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
+        return 5;
+      } else {
+        return 4;
+      }
+    } else {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 8;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 7;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
+        return 6;
+      } else {
+        return 4;
+      }
+    }
   };
 
 
@@ -5156,7 +5189,10 @@ function MainView({ setPage, page }) {
                 
                 <button
                   className={`${ !areRequiredFilesDownloaded() &&
-                    requirements.filter((el) => el.file.length > 0).length == 0
+                    requirements.filter((el) => el.file.length > 0).length == getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                      "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                        "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                          "citizenship"])
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
@@ -5179,7 +5215,7 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${ !areRequiredFilesDownloaded() 
+                  className={`${ !areRequiredFilesDownloaded()
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
