@@ -34,9 +34,6 @@ function Requirement({
   .filter((el) => el.reject_reason && typeId === el.requirements_type) // Filter by reject_reason and typeId
   .map((el) => el.reject_reason);
   const isPendingOrAccepted = documentStatus && (documentStatus === "pending" || documentStatus === "accepted");
-  const [isPQClick, setPQClick]= useState(false);
-  const [isNCWClick, setNCWClick]= useState(false)
-  
   const hiddenFileInput = useRef(null);
   let uploadedFiles = [];
   let type;
@@ -151,12 +148,16 @@ function Requirement({
     return true;
   };
 
-  const handleClick=(type)= (event) => {
-    if(type==='parentQuestionnaire' || type==='nonCatholicWaiver'){
-      if (!downloadedFiles[type]) return;
+  const handleClick = (type) => (event) => {
+    // Check if the type is one of the restricted ones
+    if (["parentQuestionnaire", "nonCatholicWaiver"].includes(type)) {
+      if (!downloadedFiles[type]) return; // Prevent clicking if not downloaded
     }
-      hiddenFileInput.current.click();
+  
+    hiddenFileInput.current.click();
   };
+  
+  
 
   const markFileAsDownloaded = (type) => {
     setDownloadedFiles((prev) => {
@@ -220,10 +221,6 @@ function Requirement({
       console.error("Error downloading file:", error);
     }
   };
-  
-  
-  
-  
   
 
   return (
@@ -546,7 +543,7 @@ function Requirement({
             <img
               className="attachment-icon-button"
               src={attachment}
-              onClick={handleClick}
+              onClick={handleClick(type)}
               hidden={type==='parentQuestionnaire'|| type==='nonCatholicWaiver'?!downloadedFiles[type]:false}
             />
           </div>

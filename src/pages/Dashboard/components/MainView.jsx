@@ -67,19 +67,8 @@ function MainView({ setPage, page }) {
 
 
   
-  // Function to check if required files are downloaded
-  const areRequiredFilesDownloaded = () => {
-    const { recoLetter, nonCatholicWaiver, parentQuestionnaire } = downloadedFiles;
-    
-    // Define required file combinations
-    return (
-      (parentQuestionnaire) || // Only parent-questionnaire
-      (parentQuestionnaire && nonCatholicWaiver) || // Parent + Non-Catholic
-      (recoLetter.teacher && recoLetter.schoolHead) || // Both recommendation letters
-      (nonCatholicWaiver) || // Only Non-Catholic Waiver
-      (recoLetter.teacher && recoLetter.schoolHead && nonCatholicWaiver) // Both + Non-Catholic
-    );
-  };
+  
+  
   
   const [requirements, setRequirements] = useState([
     { type: "birthCert", file: [] },
@@ -117,6 +106,11 @@ function MainView({ setPage, page }) {
     location: "",
     date: "",
   });
+
+
+
+  
+  
 
   const [showReschedModal, setShowReschedModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -1883,6 +1877,42 @@ function MainView({ setPage, page }) {
     setIsLoading(false);
   };
 
+  // Function to check if required files are downloaded
+  const areRequiredFilesDownloaded = () => {
+    const { recoLetter, nonCatholicWaiver, parentQuestionnaire } = downloadedFiles;
+    // Check if required files are downloaded
+    
+    const isParentAndWaiverDownloaded = parentQuestionnaire && nonCatholicWaiver;
+    const isRecoLetterComplete = recoLetter.teacher && recoLetter.schoolHead;
+    const isNonCatholicOnly = nonCatholicWaiver && !parentQuestionnaire && !isRecoLetterComplete;
+    const isParentOnly = parentQuestionnaire && !nonCatholicWaiver && !isRecoLetterComplete;
+    if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+      "citizenship"
+    ] != "Filipino"){
+      return (
+        isParentAndWaiverDownloaded || // Parent Questionnaire only (if no other requirement exists)
+        (isRecoLetterComplete && nonCatholicWaiver) // Both reco letters + non-Catholic waiver
+      );
+    }else{
+      if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "level_applying_for"
+      ] == "Kinder" ||
+      admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "level_applying_for"
+      ] == "Pre-Kinder"){
+        return (
+          isParentOnly
+        );
+      }else{
+        return (
+          isRecoLetterComplete
+        );
+      }
+    }
+    
+  };
+
+
   const getAdmissionData = async () => {
     setIsLoading(true);
     console.log(`SELECTED: ${admissionSelected}`);
@@ -1938,6 +1968,10 @@ function MainView({ setPage, page }) {
         handleFetchBaranggays(city);
         barangay = addressArr[1];
       }
+
+
+
+      
 
       return {
         levelApplyingFor:
@@ -5121,7 +5155,7 @@ function MainView({ setPage, page }) {
               edit ? (
                 
                 <button
-                  className={`${ areRequiredFilesDownloaded() &&
+                  className={`${ !areRequiredFilesDownloaded() &&
                     requirements.filter((el) => el.file.length > 0).length == 0
                       ? "btn-grey"
                       : "btn-blue"
@@ -5145,7 +5179,7 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${ !areRequiredFilesDownloaded()
+                  className={`${ !areRequiredFilesDownloaded() 
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
