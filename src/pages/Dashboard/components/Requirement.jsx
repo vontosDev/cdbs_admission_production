@@ -19,7 +19,8 @@ function Requirement({
   dataIndex,
   handleRequirements,
   isRejected,
-  setDownloadedFiles
+  setDownloadedFiles,
+  downloadedFiles
 }) {
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
@@ -33,6 +34,8 @@ function Requirement({
   .filter((el) => el.reject_reason && typeId === el.requirements_type) // Filter by reject_reason and typeId
   .map((el) => el.reject_reason);
   const isPendingOrAccepted = documentStatus && (documentStatus === "pending" || documentStatus === "accepted");
+  const [isPQClick, setPQClick]= useState(false);
+  const [isNCWClick, setNCWClick]= useState(false)
   
   const hiddenFileInput = useRef(null);
   let uploadedFiles = [];
@@ -149,7 +152,8 @@ function Requirement({
   };
 
   const handleClick = (event) => {
-    hiddenFileInput.current.click();
+      if (!downloadedFiles[type]) return;
+      hiddenFileInput.current.click();
   };
 
   const markFileAsDownloaded = (type) => {
@@ -158,15 +162,15 @@ function Requirement({
         return { ...prev, recoLetter: { ...prev.recoLetter, teacher: true } };
       } else if (type === 15) {
         return { ...prev, recoLetter: { ...prev.recoLetter, schoolHead: true } };
-      } else if (type === "nonCatholicWaiver") {
+      } else if (type === "non-catholic-waiver") {
         return { ...prev, nonCatholicWaiver: true };
-      } else if (type === "parentQuestionnaire") {
+      } else if (type === "parent-questionaire") {
         return { ...prev, parentQuestionnaire: true };
       }
       return prev;
     });
   };
-  
+
   
   const handleDownload = async (e, type, fileUrl) => {
     e.preventDefault();
@@ -195,7 +199,9 @@ function Requirement({
   
       // Mark the file as downloaded
       markFileAsDownloaded(type);
-  
+      if(type===''){
+
+      }
       const link = document.createElement("a");
       link.href = fileUrl;
       link.download =
@@ -539,6 +545,7 @@ function Requirement({
               className="attachment-icon-button"
               src={attachment}
               onClick={handleClick}
+              hidden={!downloadedFiles[type]}
             />
           </div>
         )

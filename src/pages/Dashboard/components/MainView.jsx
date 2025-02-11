@@ -4974,7 +4974,8 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(1)}
-                setDownloadedFiles={setDownloadedFiles} 
+                setDownloadedFiles={setDownloadedFiles}
+                downloadedFiles={downloadedFiles}
               />
               <Requirement
                 fetchAdmissions={getUserAdmissions}
@@ -4987,7 +4988,8 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(2)}
-                setDownloadedFiles={setDownloadedFiles} 
+                setDownloadedFiles={setDownloadedFiles}
+                downloadedFiles={downloadedFiles}
               />
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
                 "level_applying_for"
@@ -5007,7 +5009,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(4)}
-                    setDownloadedFiles={setDownloadedFiles} 
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles}
                   />
                 </>
               ) : (
@@ -5026,7 +5029,8 @@ function MainView({ setPage, page }) {
                       requirements={requirements}
                       handleRequirements={setRequirements}
                       isRejected={requirementsRejectedArr.includes(3)}
-                      setDownloadedFiles={setDownloadedFiles} 
+                      setDownloadedFiles={setDownloadedFiles}
+                      downloadedFiles={downloadedFiles} 
                     />
                   ) : null}
                   <Requirement
@@ -5040,7 +5044,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(14)}
-                    setDownloadedFiles={setDownloadedFiles} 
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -5051,7 +5056,8 @@ function MainView({ setPage, page }) {
                     fileText={"file_name.jpg/png/pdf"}
                     requirements={requirements}
                     handleRequirements={setRequirements}
-                    setDownloadedFiles={setDownloadedFiles} 
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                 </>
               )}
@@ -5070,7 +5076,8 @@ function MainView({ setPage, page }) {
                   requirements={requirements}
                   handleRequirements={setRequirements}
                   isRejected={requirementsRejectedArr.includes(13)}
-                  setDownloadedFiles={setDownloadedFiles} 
+                  setDownloadedFiles={setDownloadedFiles}
+                  downloadedFiles={downloadedFiles} 
                 />
               ) : null}
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -5088,7 +5095,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(11)}
-                    setDownloadedFiles={setDownloadedFiles} 
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -5101,7 +5109,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(12)}
-                    setDownloadedFiles={setDownloadedFiles} 
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                 </>
               ) : null}
@@ -5381,7 +5390,11 @@ function MainView({ setPage, page }) {
                             "db_exam_schedule_table"
                           ]?.["end_time"] ?? ""
                         ))?
-                    'Your Schedule Assessment is already done':'Your Assessment Exam Schedule'
+                        admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]["db_exam_admission_schedule"][0][
+                          "is_attended"]==true?
+                    'Your Schedule Assessment is already done':'Your Schedule Assessment was not attended. Please reschedule if needed.':'Your Assessment Exam Schedule'
                     }
                     </h1>
                     <h3>
