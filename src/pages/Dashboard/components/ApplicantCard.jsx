@@ -101,7 +101,7 @@ function ApplicantCard({
 
     if(isPaid && examSchedCount>0){
       if(!isAssess){
-        if(!isAttended){
+        if(!isAttended && isAttended!=null){
           return { text: "Assessment Exam - Not Attended", color: "red" };
         }else{
           return { text: "Assessment Exam - Awaiting approval", color: "blue" };

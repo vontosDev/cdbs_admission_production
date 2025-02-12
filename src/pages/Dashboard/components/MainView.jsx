@@ -196,6 +196,7 @@ function MainView({ setPage, page }) {
   let isAssessmentPending;
   let isPaymentComplete;
   let isPaymentPending;
+  const [countAssessment, setCountAssessment] = useState(0);
   let isAssessmentSelected;
   let isPendingAssessment;
   let isResultSent;
@@ -524,10 +525,12 @@ function MainView({ setPage, page }) {
         "db_exam_admission_schedule"
       ].length > 0;
 
+
     if(isAssessmentSelected>0){
+      //setCountAssessment(isAssessmentSelected);
       isAssessmentAttended= admissions["admissionsArr"][dataIndex]["db_admission_table"][
         "db_exam_admission_schedule"
-      ][0]["is_attended"]
+      ][0]["is_attended"];
     }
   }
 
@@ -5329,9 +5332,9 @@ function MainView({ setPage, page }) {
       case "calendar":
         return (
           <>
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-              "db_exam_admission_schedule"
-            ].length > 0 ? (
+            {admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]?.["db_exam_admission_schedule"].length> 0 ? (
               <Modal show={showReschedModal} id="modal-container" centered>
                 {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
@@ -5439,14 +5442,14 @@ function MainView({ setPage, page }) {
               </Modal>
             ) : null}
 
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-              "db_exam_admission_schedule"
-            ].length > 0 ? (
+            {admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]?.["db_exam_admission_schedule"].length> 0 ? (
               <Modal
                 show={
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "db_exam_admission_schedule"
-                  ].length > 0
+                  admissions["admissionsArr"][dataIndex][
+                    "db_admission_table"
+                  ]?.["db_exam_admission_schedule"].length > 0
                 }
                 id="modal-container"
                 centered
@@ -5542,17 +5545,22 @@ function MainView({ setPage, page }) {
                     <button
                       className="btn btn-blue"
                       onClick={async(e) => {
-                        setPage("main");
-                        setShowReschedModal(false);
                           if(!admissions["admissionsArr"][dataIndex][
                             "db_admission_table"
                           ]["db_exam_admission_schedule"][0][
-                            "is_attended"]){ 
+                            "is_attended"] && !admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"] !=null){ 
                             await handleSchedCancellation(
                               admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
                               'to be reschedule, due to failed to attend the assessment schedule'
                             );
                           }
+                         isAssessmentSelected=false;
+                          
+                        //setPage("main");
+                        setShowReschedModal(false);
                       }}
                     >
                       Ok, got it!

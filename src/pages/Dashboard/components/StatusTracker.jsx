@@ -79,7 +79,7 @@ function StatusTracker({
         <div className="circle-outline">4</div>
       )}
       <div className="dash-line"></div>
-      {!isAssessmentAttended && isAssessmentSelected ? 
+      {!isAssessmentAttended && isAssessmentSelected && isAssessmentAttended != null ? 
         (
           <div title="Complete" className="circle-reject">
             <img src={close} />
