@@ -20,7 +20,10 @@ import { createClient } from "@supabase/supabase-js";
 import circle_cross from "../../../assets/images/circle_cross.png";
 import Flatpickr from "react-flatpickr";
 import "../../../assets/themes/material_blue.css";
-
+import kinderAssessment from "../../../assets/documents/Kinder Assessment Reminder.pdf";
+import preKinderAssessment from "../../../assets/documents/Pre-Kinder Assessment Reminder.pdf";
+import grade1Assessment from "../../../assets/documents/Grade 1 Assessment Reminder.pdf";
+import grade2to6Assessment from "../../../assets/documents/Grade 2 to 6 Assessment Reminder.pdf";
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
@@ -1912,6 +1915,20 @@ function MainView({ setPage, page }) {
     
   };
 
+
+  const getLevelAssessmentReminder=(level_applying_for)=>{
+
+    if(level_applying_for=='Kinder' || level_applying_for=='kinder'){
+      return kinderAssessment;
+    }else if(level_applying_for=='Pre-Kinder' || level_applying_for=='pre-kinder'){
+      return preKinderAssessment;
+    }else if(level_applying_for=='Grade 1' || level_applying_for=='grade 1'){
+      return grade1Assessment;
+    }else{
+      return grade2to6Assessment
+    }
+
+  }
 
   const getRequiredDocumentsCount = (level_applying_for, religion, citizenship) => {
     if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder" || level_applying_for === "Grade 1") {
@@ -5180,11 +5197,7 @@ function MainView({ setPage, page }) {
               edit ? (
                 
                 <button
-                  className={`${ !areRequiredFilesDownloaded() &&
-                    requirements.filter((el) => el.file.length > 0).length == getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                      "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                        "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                          "citizenship"])
+                  className={`${ requirements.filter((el) => el.file.length > 0).length == 0
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
@@ -5508,6 +5521,18 @@ function MainView({ setPage, page }) {
                     {/* <hr className="payment-line" /> */}
                     {/* <h2>{formData.email}</h2> */}
 
+                    <br></br>
+                    <h3>
+                      <div>
+                      <strong>Download</strong>
+                      <br></br>
+                        <a href={getLevelAssessmentReminder(`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}`)} download={`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}-assessment`}>
+                        {admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']} Assessment Reminder
+                        </a>
+                      </div>
+                    
+                    
+                    </h3>
                     <hr className="line-container" />
                     <button
                       className="btn btn-blue"
