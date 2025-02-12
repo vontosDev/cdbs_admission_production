@@ -18,6 +18,7 @@ function StatusTracker({
   isUploadCreated,
   isPaid,
   isPassed,
+  isAssessmentAttended
 }) {
   return (
     <div className="steps-container ">
@@ -78,7 +79,13 @@ function StatusTracker({
         <div className="circle-outline">4</div>
       )}
       <div className="dash-line"></div>
-      {isPendingAssessment || isResultSent? (
+      {!isAssessmentAttended && isAssessmentSelected ? 
+        (
+          <div title="Complete" className="circle-reject">
+            <img src={close} />
+          </div>
+        )
+      :isPendingAssessment || isResultSent? (
         <div title="Complete" className="circle">
           <img src={check} />
         </div>

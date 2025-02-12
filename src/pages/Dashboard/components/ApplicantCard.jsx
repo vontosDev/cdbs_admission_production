@@ -53,6 +53,7 @@ function ApplicantCard({
     const isAssess=admissionTable["is_for_assessment"];
     const isResult = admissionTable["is_final_result"];
     const isPassed =admissionTable["is_passed"];
+    const isAttended = admissionTable["db_exam_admission_schedule"]?.[0]?.["is_attended"];
     // Check application creation and status
     if (!isApplicationCreated && !isCompleteView) {
       return { text: "Application - Ready to proceed", color: "yellow" };
@@ -100,7 +101,11 @@ function ApplicantCard({
 
     if(isPaid && examSchedCount>0){
       if(!isAssess){
-        return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+        if(!isAttended){
+          return { text: "Assessment Exam - Not Attended", color: "red" };
+        }else{
+          return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+        } 
       }
     }
 

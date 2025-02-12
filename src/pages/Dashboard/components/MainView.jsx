@@ -201,6 +201,7 @@ function MainView({ setPage, page }) {
   let isResultSent;
   let isResultPending;
   let isPassed;
+  let isAssessmentAttended;
 
   let requirementsRejectedArr = [];
 
@@ -522,6 +523,12 @@ function MainView({ setPage, page }) {
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
         "db_exam_admission_schedule"
       ].length > 0;
+
+    if(isAssessmentSelected>0){
+      isAssessmentAttended= admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "db_exam_admission_schedule"
+      ][0]["is_attended"]
+    }
   }
 
   // console.log(isApplicationComplete);
@@ -2839,6 +2846,7 @@ function MainView({ setPage, page }) {
                           "db_admission_table"
                         ]["is_all_required_file_uploaded"]
                       }
+                      isAssessmentAttended={isAssessmentAttended}
                     />
                     <div className="tracking-desc-section">
                       <div className="desc-steps">
@@ -5471,8 +5479,11 @@ function MainView({ setPage, page }) {
                         admissions["admissionsArr"][dataIndex][
                           "db_admission_table"
                         ]["db_exam_admission_schedule"][0][
-                          "is_attended"]==true?
-                    'Your Schedule Assessment is already done':'Your Schedule Assessment was not attended. Please reschedule if needed.':'Your Assessment Exam Schedule'
+                          "is_attended"]?
+                    'Your Schedule Assessment is already done. Please wait for the result':'Your Schedule Assessment was not attended. Please reschedule if needed.':admissions["admissionsArr"][dataIndex][
+                      "db_admission_table"
+                    ]["db_exam_admission_schedule"][0][
+                      "is_attended"]?'Your Schedule Assessment is already done. Please wait for the result':'Your Schedule Assessment was not attended. Please reschedule if needed.'
                     }
                     </h1>
                     <h3>
@@ -5530,9 +5541,18 @@ function MainView({ setPage, page }) {
                     <hr className="line-container" />
                     <button
                       className="btn btn-blue"
-                      onClick={() => {
+                      onClick={async(e) => {
                         setPage("main");
                         setShowReschedModal(false);
+                          if(!admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"]){ 
+                            await handleSchedCancellation(
+                              admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
+                              'to be reschedule, due to failed to attend the assessment schedule'
+                            );
+                          }
                       }}
                     >
                       Ok, got it!
