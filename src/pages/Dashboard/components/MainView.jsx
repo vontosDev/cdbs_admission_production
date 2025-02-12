@@ -5180,10 +5180,7 @@ function MainView({ setPage, page }) {
               edit ? (
                 
                 <button
-                  className={`${ !areRequiredFilesDownloaded() || requirements.filter((el) => el.file.length > 0).length != getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                      "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                        "citizenship"])
+                  className={`${ requirements.filter((el) => el.file.length > 0).length == 0
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
@@ -5206,7 +5203,10 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${ !areRequiredFilesDownloaded()
+                  className={`${ !areRequiredFilesDownloaded() || requirements.filter((el) => el.file.length > 0).length != getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                    "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                      "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                        "citizenship"])
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
