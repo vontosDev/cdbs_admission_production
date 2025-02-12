@@ -1914,7 +1914,7 @@ function MainView({ setPage, page }) {
 
 
   const getRequiredDocumentsCount = (level_applying_for, religion, citizenship) => {
-    if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder") {
+    if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder" || level_applying_for === "Grade 1") {
       if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
         return 6;
       } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
@@ -1922,16 +1922,6 @@ function MainView({ setPage, page }) {
       } else if (religion !== "Roman Catholic" && citizenship === "Filipino"){
         return 4;
       }else{
-        return 3;
-      }
-    } else if (level_applying_for === "Grade 1") {
-      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
-        return 6;
-      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
-        return 5;
-      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
-        return 4;
-      } else {
         return 3;
       }
     } else {
