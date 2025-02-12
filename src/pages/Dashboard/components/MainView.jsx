@@ -1919,26 +1919,28 @@ function MainView({ setPage, page }) {
         return 6;
       } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
         return 5;
-      } else {
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino"){
         return 4;
+      }else{
+        return 3;
       }
     } else if (level_applying_for === "Grade 1") {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 5;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
+        return 4;
+      } else {
+        return 3;
+      }
+    } else {
       if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
         return 7;
       } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
         return 6;
       } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
         return 5;
-      } else {
-        return 4;
-      }
-    } else {
-      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
-        return 8;
-      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
-        return 7;
-      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
-        return 6;
       } else {
         return 4;
       }
@@ -5215,7 +5217,10 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${ !areRequiredFilesDownloaded()
+                  className={`${ !areRequiredFilesDownloaded() || requirements.filter((el) => el.file.length > 0).length != getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                    "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                      "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                        "citizenship"])
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
