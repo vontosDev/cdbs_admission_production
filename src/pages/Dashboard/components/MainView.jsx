@@ -5524,9 +5524,8 @@ function MainView({ setPage, page }) {
                     <br></br>
                     <h3>
                       <div>
-                      <strong>Download</strong>
-                      <br></br>
-                        <a href={getLevelAssessmentReminder(`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}`)} download={`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}-assessment`}>
+                      <strong>Download: </strong>
+                        <a href={getLevelAssessmentReminder(`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}`)} download={`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}-assessment`} style={{ color: "#007bff", textDecoration: "underline" }}>
                         {admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']} Assessment Reminder
                         </a>
                       </div>
