@@ -5523,13 +5523,9 @@ function MainView({ setPage, page }) {
 
                     <br></br>
                     <h3>
-                      <div>
                         <a href={getLevelAssessmentReminder(`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}`)} download={`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}-assessment`} style={{ color: "#012169", textDecoration: "underline" }}>
                         View {admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']} Assessment Reminder
                         </a>
-                      </div>
-                    
-                    
                     </h3>
                     <hr className="line-container" />
                     <button
