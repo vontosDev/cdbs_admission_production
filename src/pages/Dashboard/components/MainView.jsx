@@ -5484,7 +5484,7 @@ function MainView({ setPage, page }) {
                             ))?'Today is scheduled assessment':'Your Scheduled Assessment':admissions["admissionsArr"][dataIndex][
                               "db_admission_table"
                             ]["db_exam_admission_schedule"][0][
-                              "is_attended"]?'Your Scheduled Assessment is already done. Please wait for the result':'Your Scheduled Assessment was not attended. Please reschedule if needed.'
+                              "is_attended"]?'Your scheduled assessment has been completed. Please await the results.':'Your Scheduled Assessment was not attended. Please reschedule if needed.'
                     }
                     </h1>
                     <h3>
