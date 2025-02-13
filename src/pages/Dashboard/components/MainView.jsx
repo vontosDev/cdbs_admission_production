@@ -2919,7 +2919,7 @@ function MainView({ setPage, page }) {
                           style={{ color: isPaymentComplete ? "#aaa" : "" }}
                           className="admission-step desc-step desc-step-succ"
                           onClick={() => {
-                            if (!isUploadComplete || isApplicationPending) {
+                            if (isPaymentComplete) {
                               return;
                             }
                             setPage("payment");
@@ -2931,7 +2931,7 @@ function MainView({ setPage, page }) {
                           className="admission-step desc-step desc-step-succ"
                           style={{ color: isAssessmentSelected ? "#aaa" : "" }}
                           onClick={async () => {
-                            if (!isPaymentComplete) return;
+                            if (isAssessmentAttended) return;
                             if (isResultSent) return;
                             await getSchedules(
                               admissions["admissionsArr"][dataIndex][
