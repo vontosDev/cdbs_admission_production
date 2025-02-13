@@ -176,7 +176,7 @@ function MainView({ setPage, page }) {
       const endTimeObj = new Date(currentTime.setHours(endHour24, endMinute, 0, 0));
   
       // Return true if the current time is past the exam's end time, meaning the exam has passed
-      return currentTime > endTimeObj;
+      return currentTime > endTimeObj || currentTime >=startTimeObj;
     }
   
     return false; // Return false if it's not the exam date
@@ -5481,10 +5481,10 @@ function MainView({ setPage, page }) {
                               ]["db_exam_admission_schedule"][0][
                                 "db_exam_schedule_table"
                               ]?.["end_time"] ?? ""
-                            ))?'Today is your Schedule Assessment':'Your Schedule Assessment':!admissions["admissionsArr"][dataIndex][
+                            ))?'Today is scheduled assessment':'Your Scheduled Assessment':admissions["admissionsArr"][dataIndex][
                               "db_admission_table"
                             ]["db_exam_admission_schedule"][0][
-                              "is_attended"]?'Your Schedule Assessment is already done. Please wait for the result':'Your Schedule Assessment was not attended. Please reschedule if needed.'
+                              "is_attended"]?'Your Scheduled Assessment is already done. Please wait for the result':'Your Scheduled Assessment was not attended. Please reschedule if needed.'
                     }
                     </h1>
                     <h3>
@@ -5550,12 +5550,10 @@ function MainView({ setPage, page }) {
                               "db_admission_table"
                             ]["db_exam_admission_schedule"][0][
                               "is_attended"] !=null){ 
-                                console.log('true');
                             await handleSchedCancellation(admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
                               'to be reschedule, due to failed to attend the assessment schedule'
                             );
                           }
-                          
                         setPage("main");
                         setShowReschedModal(false);
                       }}
@@ -5591,7 +5589,13 @@ function MainView({ setPage, page }) {
                             setCancelReasonString("");
                             setShowReschedModal((prev) => !prev);
                           }}
-                          disabled={daysDifference <= 2} // Disable if more than 2 days difference
+                          disabled={daysDifference <= 2 || (admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"] && admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"] !=null)} // Disable if more than 2 days difference
                         >
                           Reschedule
                         </button>
