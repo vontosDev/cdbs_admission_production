@@ -544,10 +544,10 @@ function MainView({ setPage, page }) {
 
     // Create a Date object with the given time (assuming today's date)
     const date = new Date();
-    date.setHours(hours, minutes);
+    date.setHours(hours, minutes,0);
 
     // Use toLocaleString to format the time in 12-hour AM/PM format
-    const options = { hour: "numeric", minute: "numeric", hour12: true };
+    const options = { hour: "2-digit", minute: "2-digit", hour12: true };
     return date.toLocaleString("en-US", options);
   }
 
