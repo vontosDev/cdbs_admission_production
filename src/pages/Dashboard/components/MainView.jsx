@@ -5627,7 +5627,6 @@ function MainView({ setPage, page }) {
                     setShowReschedModal(false);
                 }}
               >
-                ✕
               </div>
                 {/* <img src={wallet} className="logo-verification" /> Walang Sched*/}
                 

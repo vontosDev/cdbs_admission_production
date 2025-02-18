@@ -72,7 +72,8 @@ function ScheduleItem({
     );
   }
 
-  // Convert military time (e.g. 13:00) to 12-hour AM/PM format1
+
+  // Convert military time (e.g. 13:00) to 12-hour AM/PM format
   function convertMilitaryToAMPM(militaryTime) {
     const [hours, minutes] = militaryTime.split(":").map(Number);
 
@@ -105,7 +106,7 @@ function ScheduleItem({
     <div
       className={`schedule-item-container ${isPassed ? "gray-out" : ""}`}
       onClick={() => {
-        if (!isPassed) {
+        if (!isPassed && !isSameDay(formDate, currentDate)) {
           handleScheduleDetails(
             scheduleId,
             convertMilitaryToAMPM(timeStart),
@@ -121,8 +122,8 @@ function ScheduleItem({
         }
       }}
       style={{
-        cursor: isPassed ? "not-allowed" : "pointer",
-        backgroundColor: isPassed ? "#d3d3d3" : "transparent", // Gray out passed schedules
+        cursor: isPassed || isSameDay(formDate, currentDate) ? "not-allowed" : "pointer",
+        backgroundColor: isPassed || isSameDay(formDate, currentDate) ? "#d3d3d3" : "transparent", // Gray out passed schedules
       }}
     >
       <span>
