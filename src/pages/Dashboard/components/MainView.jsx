@@ -24,7 +24,6 @@ import kinderAssessment from "../../../assets/documents/Kinder Assessment Remind
 import preKinderAssessment from "../../../assets/documents/Pre-Kinder Assessment Reminder.pdf";
 import grade1Assessment from "../../../assets/documents/Grade 1 Assessment Reminder.pdf";
 import grade2to6Assessment from "../../../assets/documents/Grade 2 to 6 Assessment Reminder.pdf";
-
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
@@ -71,19 +70,7 @@ function MainView({ setPage, page }) {
 
 
   
-  const getLevelAssessmentReminder=(level_applying_for)=>{
-
-    if(level_applying_for=='Kinder' || level_applying_for=='kinder'){
-      return kinderAssessment;
-    }else if(level_applying_for=='Pre-Kinder' || level_applying_for=='pre-kinder'){
-      return preKinderAssessment;
-    }else if(level_applying_for=='Grade 1' || level_applying_for=='grade 1'){
-      return grade1Assessment;
-    }else{
-      return grade2to6Assessment
-    }
-
-  }
+  
   
   
   const [requirements, setRequirements] = useState([
@@ -189,7 +176,7 @@ function MainView({ setPage, page }) {
       const endTimeObj = new Date(currentTime.setHours(endHour24, endMinute, 0, 0));
   
       // Return true if the current time is past the exam's end time, meaning the exam has passed
-      return currentTime > endTimeObj;
+      return currentTime > endTimeObj || currentTime >=startTimeObj;
     }
   
     return false; // Return false if it's not the exam date
@@ -209,11 +196,13 @@ function MainView({ setPage, page }) {
   let isAssessmentPending;
   let isPaymentComplete;
   let isPaymentPending;
+  const [countAssessment, setCountAssessment] = useState(0);
   let isAssessmentSelected;
   let isPendingAssessment;
   let isResultSent;
   let isResultPending;
   let isPassed;
+  let isAssessmentAttended;
 
   let requirementsRejectedArr = [];
 
@@ -535,6 +524,14 @@ function MainView({ setPage, page }) {
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
         "db_exam_admission_schedule"
       ].length > 0;
+
+
+    if(isAssessmentSelected>0){
+      //setCountAssessment(isAssessmentSelected);
+      isAssessmentAttended= admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "db_exam_admission_schedule"
+      ][0]["is_attended"];
+    }
   }
 
   // console.log(isApplicationComplete);
@@ -1929,6 +1926,20 @@ function MainView({ setPage, page }) {
   };
 
 
+  const getLevelAssessmentReminder=(level_applying_for)=>{
+
+    if(level_applying_for=='Kinder' || level_applying_for=='kinder'){
+      return kinderAssessment;
+    }else if(level_applying_for=='Pre-Kinder' || level_applying_for=='pre-kinder'){
+      return preKinderAssessment;
+    }else if(level_applying_for=='Grade 1' || level_applying_for=='grade 1'){
+      return grade1Assessment;
+    }else{
+      return grade2to6Assessment
+    }
+
+  }
+
   const getRequiredDocumentsCount = (level_applying_for, religion, citizenship) => {
     if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder" || level_applying_for === "Grade 1") {
       if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
@@ -2838,6 +2849,7 @@ function MainView({ setPage, page }) {
                           "db_admission_table"
                         ]["is_all_required_file_uploaded"]
                       }
+                      isAssessmentAttended={isAssessmentAttended}
                     />
                     <div className="tracking-desc-section">
                       <div className="desc-steps">
@@ -2907,7 +2919,7 @@ function MainView({ setPage, page }) {
                           style={{ color: isPaymentComplete ? "#aaa" : "" }}
                           className="admission-step desc-step desc-step-succ"
                           onClick={() => {
-                            if (!isUploadComplete || isApplicationPending) {
+                            if (isPaymentComplete) {
                               return;
                             }
                             setPage("payment");
@@ -2919,7 +2931,7 @@ function MainView({ setPage, page }) {
                           className="admission-step desc-step desc-step-succ"
                           style={{ color: isAssessmentSelected ? "#aaa" : "" }}
                           onClick={async () => {
-                            if (!isPaymentComplete) return;
+                            if (isAssessmentAttended) return;
                             if (isResultSent) return;
                             await getSchedules(
                               admissions["admissionsArr"][dataIndex][
@@ -5320,9 +5332,9 @@ function MainView({ setPage, page }) {
       case "calendar":
         return (
           <>
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-              "db_exam_admission_schedule"
-            ].length > 0 ? (
+            {admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]?.["db_exam_admission_schedule"].length> 0 ? (
               <Modal show={showReschedModal} id="modal-container" centered>
                 {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
@@ -5430,14 +5442,14 @@ function MainView({ setPage, page }) {
               </Modal>
             ) : null}
 
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-              "db_exam_admission_schedule"
-            ].length > 0 ? (
+            {admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]?.["db_exam_admission_schedule"].length> 0 ? (
               <Modal
                 show={
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "db_exam_admission_schedule"
-                  ].length > 0
+                  admissions["admissionsArr"][dataIndex][
+                    "db_admission_table"
+                  ]?.["db_exam_admission_schedule"].length > 0
                 }
                 id="modal-container"
                 centered
@@ -5450,28 +5462,29 @@ function MainView({ setPage, page }) {
                 <Modal.Body>
                   <div className="payment-box">
                     {/* <img src={wallet} className="logo-verification" /> */}
-                    <h1>{checkExamStatus(admissions["admissionsArr"][dataIndex][
-                          "db_admission_table"
-                        ]?.["db_exam_admission_schedule"]?.[0]?.[
-                          "db_exam_schedule_table"
-                        ]?.["exam_date"], convertMilitaryToAMPM(
-                          admissions["admissionsArr"][dataIndex][
+                    <h1>{admissions["admissionsArr"][dataIndex][
                             "db_admission_table"
                           ]["db_exam_admission_schedule"][0][
-                            "db_exam_schedule_table"
-                          ]?.["start_time"] ?? ""
-                        ),convertMilitaryToAMPM(
-                          admissions["admissionsArr"][dataIndex][
-                            "db_admission_table"
-                          ]["db_exam_admission_schedule"][0][
-                            "db_exam_schedule_table"
-                          ]?.["end_time"] ?? ""
-                        ))?
-                        admissions["admissionsArr"][dataIndex][
-                          "db_admission_table"
-                        ]["db_exam_admission_schedule"][0][
-                          "is_attended"]==true?
-                    'Your Schedule Assessment is already done':'Your Schedule Assessment was not attended. Please reschedule if needed.':'Your Assessment Exam Schedule'
+                            "is_attended"] ==null?checkExamStatus(admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]?.["db_exam_admission_schedule"]?.[0]?.[
+                              "db_exam_schedule_table"
+                            ]?.["exam_date"], convertMilitaryToAMPM(
+                              admissions["admissionsArr"][dataIndex][
+                                "db_admission_table"
+                              ]["db_exam_admission_schedule"][0][
+                                "db_exam_schedule_table"
+                              ]?.["start_time"] ?? ""
+                            ),convertMilitaryToAMPM(
+                              admissions["admissionsArr"][dataIndex][
+                                "db_admission_table"
+                              ]["db_exam_admission_schedule"][0][
+                                "db_exam_schedule_table"
+                              ]?.["end_time"] ?? ""
+                            ))?'Today is scheduled assessment':'Your Scheduled Assessment':admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"]?'Your scheduled assessment has been completed. Please await the results.':'Your Scheduled Assessment was not attended. Please reschedule if needed.'
                     }
                     </h1>
                     <h3>
@@ -5526,11 +5539,21 @@ function MainView({ setPage, page }) {
                         View {admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']} Assessment Reminder
                         </a>
                     </h3>
-
                     <hr className="line-container" />
                     <button
                       className="btn btn-blue"
-                      onClick={() => {
+                      onClick={async(e) => {
+                          if(!admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"] && admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"] !=null){ 
+                            await handleSchedCancellation(admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
+                              'to be reschedule, due to failed to attend the assessment schedule'
+                            );
+                          }
                         setPage("main");
                         setShowReschedModal(false);
                       }}
@@ -5566,7 +5589,13 @@ function MainView({ setPage, page }) {
                             setCancelReasonString("");
                             setShowReschedModal((prev) => !prev);
                           }}
-                          disabled={daysDifference !== 2} // Disable if more than 2 days difference
+                          disabled={daysDifference <= 2 || (admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"] && admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"] !=null)} // Disable if more than 2 days difference
                         >
                           Reschedule
                         </button>
