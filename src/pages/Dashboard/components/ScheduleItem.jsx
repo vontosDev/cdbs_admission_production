@@ -72,7 +72,7 @@ function ScheduleItem({
     );
   }
 
-  // Convert military time (e.g. 13:00) to 12-hour AM/PM format
+  // Convert military time (e.g. 13:00) to 12-hour AM/PM format1
   function convertMilitaryToAMPM(militaryTime) {
     const [hours, minutes] = militaryTime.split(":").map(Number);
 
