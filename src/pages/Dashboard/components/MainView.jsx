@@ -5589,7 +5589,7 @@ function MainView({ setPage, page }) {
                             setCancelReasonString("");
                             setShowReschedModal((prev) => !prev);
                           }}
-                          disabled={daysDifference <= 2 || (admissions["admissionsArr"][dataIndex][
+                          disabled={daysDifference >= 2 || (admissions["admissionsArr"][dataIndex][
                             "db_admission_table"
                           ]["db_exam_admission_schedule"][0][
                             "is_attended"] && admissions["admissionsArr"][dataIndex][
