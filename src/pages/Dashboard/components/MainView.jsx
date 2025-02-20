@@ -541,10 +541,10 @@ function MainView({ setPage, page }) {
 
     // Create a Date object with the given time (assuming today's date)
     const date = new Date();
-    date.setHours(hours, minutes);
+    date.setHours(hours, minutes,0);
 
     // Use toLocaleString to format the time in 12-hour AM/PM format
-    const options = { hour: "numeric", minute: "numeric", hour12: true };
+    const options = { hour: "2-digit", minute: "2-digit", hour12: true };
     return date.toLocaleString("en-US", options);
   }
 
@@ -659,7 +659,7 @@ function MainView({ setPage, page }) {
       for (let file of requirement.file) {
         const formData = new FormData();
         formData.append("bucket_name", "document_upload");
-        formData.append("file", file);
+        formData.append("files", file);
         // formData.append("");
 
         // Add requirements_type based on the requirement type
@@ -5589,7 +5589,7 @@ function MainView({ setPage, page }) {
                             setCancelReasonString("");
                             setShowReschedModal((prev) => !prev);
                           }}
-                          disabled={daysDifference <= 2 || (admissions["admissionsArr"][dataIndex][
+                          disabled={daysDifference >= 2 || (admissions["admissionsArr"][dataIndex][
                             "db_admission_table"
                           ]["db_exam_admission_schedule"][0][
                             "is_attended"] && admissions["admissionsArr"][dataIndex][
