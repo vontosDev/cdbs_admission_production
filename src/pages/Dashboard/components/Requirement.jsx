@@ -421,7 +421,39 @@ function Requirement({
               {mainTitle !== "Recommendation Letter"
                 ? uploadedFiles.map((el, i) => (
                     <div className="upload-view-btn-container" key={i}>
-                      <a
+
+<a
+                        id="view-upload"
+                        href={el.document_url[0]}  // Use the first URL in the array for the href
+                        key={i}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent the default link behavior
+                      
+                          // If `el.document_url` is a string, split it by commas to get an array of URLs
+                          const urls = typeof el.document_url === 'string'
+                            ? el.document_url.split(',').map(url => url.trim()) // Split and trim URLs
+                            : Array.isArray(el.document_url)
+                            ? el.document_url // If already an array, use it directly
+                            : []; // Default to an empty array if neither string nor array
+                      
+                          // Log the URLs to check the result
+                          console.log(urls);
+                      
+                          // Open each URL in a new tab
+                          urls.forEach((url) => {
+                            const cleanUrl = url.replace(/[\[\]"']/g, "");  // Clean any unwanted characters like brackets or quotes
+                            console.log(`Opening URL: ${cleanUrl}`); // Log which URL is being opened
+                            window.open(cleanUrl, '_blank');  // Open the cleaned URL in a new tab
+                          });
+                        }}
+                    >
+                      <span className="btn-view">
+                        <img src={showEye} alt="view" /> Uploaded File
+                      </span>
+                    </a>
+                      {/*<a
                         id="view-upload"
                         href={
                           Array.isArray(el.document_url)
@@ -435,7 +467,7 @@ function Requirement({
                         <span className="btn-view">
                           <img src={showEye} /> Uploaded File
                         </span>
-                      </a>
+                      </a>*/}
                       {(el.document_status !== "accepted" && !isRequiredViewing) && (  // Check if file is not approved or hasn't been uploaded yet
                         <button
                           className="close-btn"

@@ -653,6 +653,147 @@ function MainView({ setPage, page }) {
       }
     }
 
+    // Create an array to store promises for concurrent uploads
+    const uploadPromises = [];
+
+    for (let requirement of requirements) {
+      if (requirement.file.length === 0) continue; // Skip if no files for this requirement
+
+      const formData = new FormData();
+      formData.append("bucket_name", "document_upload");
+      
+      // Append multiple files
+      requirement.file.forEach(file => {
+        formData.append("files", file);
+      });
+
+      // Add requirements_type based on the requirement type
+      let requirementType;
+      let docRequiredIds = [];
+
+      switch (requirement.type) {
+        case "birthCert":
+          requirementType = 1;
+          docRequiredIds = getRejectRequirementIds("birthCert");
+          break;
+        case "recentIdPhoto":
+          requirementType = 2;
+          docRequiredIds = getRejectRequirementIds("recentIdPhoto");
+          break;
+        case "reportPreviousCard":
+          requirementType = 3;
+          docRequiredIds = getRejectRequirementIds("reportPreviousCard");
+          break;
+        case "reportPresentCard":
+          requirementType = 14;
+          docRequiredIds = getRejectRequirementIds("reportPresentCard");
+          break;
+        case "parentQuestionnaire":
+          requirementType = 4;
+          docRequiredIds = getRejectRequirementIds("parentQuestionnaire");
+          break;
+        case "baptismalCert":
+          requirementType = 8;
+          docRequiredIds = getRejectRequirementIds("baptismalCert");
+          break;
+        case "communionCert":
+          requirementType = 9;
+          docRequiredIds = getRejectRequirementIds("communionCert");
+          break;
+        case "marriageCert":
+          requirementType = 10;
+          docRequiredIds = getRejectRequirementIds("marriageCert");
+          break;
+        case "recoLetter":
+          requirementType = 5;
+          docRequiredIds = getRejectRequirementIds("recoLetter");
+          break;
+        case "nonCatholicWaiver":
+          requirementType = 13;
+          docRequiredIds = getRejectRequirementIds("nonCatholicWaiver");
+          break;
+        case "alienCert":
+          requirementType = 11;
+          docRequiredIds = getRejectRequirementIds("alienCert");
+          break;
+        case "passport":
+          requirementType = 12;
+          docRequiredIds = getRejectRequirementIds("passport");
+          break;
+        default:
+          break;
+      }
+
+      formData.append("requirements_type", requirementType);
+      
+      // Append reject IDs to formData if any
+      docRequiredIds.forEach(id => {
+        formData.append("doc_required_id", id);
+      });
+
+      formData.append("admission_id", admissionSelected);
+
+      // Push the upload promise to the array
+      uploadPromises.push(
+        fetch("https://dbs-api-live.vercel.app/api/admission/upload_requirements", {
+          method: "POST",
+          headers: {
+            "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+            "supabase-key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+          },
+          body: formData,
+        }).then((response) => response.json())
+      );
+    }
+
+    try {
+      // Wait for all uploads to complete
+      const uploadResults = await Promise.all(uploadPromises);
+      console.log(uploadResults);
+
+      // If all uploads are successful
+      setIsLoading(false);
+      Swal.fire({
+        title: "Upload Complete",
+        text: "Please wait for the files to be reviewed.",
+        icon: "success",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setPage("main");
+        }
+      });
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Error uploading files:", error);
+      Swal.fire({
+        title: "Upload Failed",
+        text: "There was an error uploading your files. Please try again.",
+        icon: "error",
+      });
+    }
+};
+
+const getRejectRequirementIds = (type) => {
+  // Return the list of rejected document ids based on the type
+  const rejectDoc = rejectRequirementIds.find(el => el.type === type);
+  return rejectDoc ? rejectDoc.ids : [];
+};
+  /*const handleUpload = async () => {
+    setIsLoading(true);
+    console.log(requirements);
+    const lengthReq = getLengthRequirements();
+    console.log(`UPLOAD: ${lengthReq}`);
+
+    if (!edit) {
+      if (
+        lengthReq != requirements.filter((rqmt) => rqmt.file.length > 0).length
+      ) {
+        console.log("do not upload");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     for (let requirement of requirements) {
       if (requirement.file.length === 0) continue; // Skip if no files for this requirement
 
@@ -867,7 +1008,7 @@ function MainView({ setPage, page }) {
         setPage("main");
       }
     });
-  };
+  };*/
 
   const handleShowCalendarModal = () => {
     setShowCalendarModal((prev) => !prev);
