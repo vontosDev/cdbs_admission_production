@@ -24,6 +24,7 @@ import kinderAssessment from "../../../assets/documents/Kinder Assessment Remind
 import preKinderAssessment from "../../../assets/documents/Pre-Kinder Assessment Reminder.pdf";
 import grade1Assessment from "../../../assets/documents/Grade 1 Assessment Reminder.pdf";
 import grade2to6Assessment from "../../../assets/documents/Grade 2 to 6 Assessment Reminder.pdf";
+import showEye from "../../../assets/images/showEye.svg";
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
@@ -778,6 +779,8 @@ const getRejectRequirementIds = (type) => {
   const rejectDoc = rejectRequirementIds.find(el => el.type === type);
   return rejectDoc ? rejectDoc.ids : [];
 };
+
+
   /*const handleUpload = async () => {
     setIsLoading(true);
     console.log(requirements);
@@ -800,7 +803,7 @@ const getRejectRequirementIds = (type) => {
       for (let file of requirement.file) {
         const formData = new FormData();
         formData.append("bucket_name", "document_upload");
-        formData.append("file", file);
+        formData.append("files", file);
         // formData.append("");
 
         // Add requirements_type based on the requirement type
@@ -2846,24 +2849,46 @@ const getRejectRequirementIds = (type) => {
                       <strong style={{ color: isPassed ? "green" : "red" }}>
                         {admissions["admissionsArr"][dataIndex][
                           "db_admission_table"
-                        ]?.["is_passed"]
-                          ? "PASSED"
-                          : "FAILED"}
+                        ]?.["admission_status"]}
                       </strong>
                     </h2>
                     <hr />
-                    {isPassed ? (
+                    
                       <>
-                        <h2>Pre Enrollment Requirements</h2>
                         <hr />
-                        <h3>1x PSA Birth Certificate (Original Copy)</h3>
-                        <h3>1x Report Card (Previous School)</h3>
                         <h3>
-                          Please submit the pre requirements at the school.
-                          Thank you!
-                        </h3>
+                        <a
+                                                id="view-upload"
+                                                href={admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc']}  // Use the first URL in the array for the href
+                                              
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => {
+                                                  e.preventDefault(); // Prevent the default link behavior
+                                              
+                                                  // If `el.document_url` is a string, split it by commas to get an array of URLs
+                                                  const urls = typeof admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'] === 'string'
+                                                    ? admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'].split(',').map(url => url.trim()) // Split and trim URLs
+                                                    : Array.isArray(admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'])
+                                                    ? admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'] // If already an array, use it directly
+                                                    : []; // Default to an empty array if neither string nor array
+                                              
+                                                  // Log the URLs to check the result
+                                                  console.log(urls);
+                                              
+                                                  // Open each URL in a new tab
+                                                  urls.forEach((url) => {
+                                                    const cleanUrl = url.replace(/[\[\]"']/g, "");  // Clean any unwanted characters like brackets or quotes
+                                                    console.log(`Opening URL: ${cleanUrl}`); // Log which URL is being opened
+                                                    window.open(cleanUrl, '_blank');  // Open the cleaned URL in a new tab
+                                                  });
+                                                }}
+                                                style={{ color: "#012169", textDecoration: "underline" }}
+                                            >
+                                             Download Assessment Result
+                                            </a></h3>
                       </>
-                    ) : null}
+                    
 
                     {/* <hr className="payment-line" /> */}
                     {/* <h2>{formData.email}</h2> */}
@@ -5768,6 +5793,7 @@ const getRejectRequirementIds = (type) => {
                     setShowReschedModal(false);
                 }}
               >
+                ✕
               </div>
                 {/* <img src={wallet} className="logo-verification" /> Walang Sched*/}
                 
