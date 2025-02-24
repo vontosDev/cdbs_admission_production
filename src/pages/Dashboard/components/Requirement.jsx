@@ -32,7 +32,7 @@ function Requirement({
   .map((el) => el.document_status);
   const requiredDocumentsTable  = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_required_documents_table"]
   .filter((el) => el.reject_reason && typeId === el.requirements_type) // Filter by reject_reason and typeId
-  .map((el) => el.reject_reason);
+  .map((el) => el.reject_reason)[0];
   const isPendingOrAccepted = documentStatus && (documentStatus === "pending" || documentStatus === "accepted");
   const hiddenFileInput = useRef(null);
   let uploadedFiles = [];
