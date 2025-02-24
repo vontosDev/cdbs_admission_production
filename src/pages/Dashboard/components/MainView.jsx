@@ -3085,7 +3085,7 @@ const getRejectRequirementIds = (type) => {
                           style={{ color: isPaymentComplete ? "#aaa" : "" }}
                           className="admission-step desc-step desc-step-succ"
                           onClick={() => {
-                            if (isPaymentComplete) {
+                            if (!isUploadComplete) {
                               return;
                             }
                             setPage("payment");
@@ -3097,7 +3097,7 @@ const getRejectRequirementIds = (type) => {
                           className="admission-step desc-step desc-step-succ"
                           style={{ color: isAssessmentSelected ? "#aaa" : "" }}
                           onClick={async () => {
-                            if (isAssessmentAttended) return;
+                            if (!isPaymentComplete) return;
                             if (isResultSent) return;
                             await getSchedules(
                               admissions["admissionsArr"][dataIndex][
