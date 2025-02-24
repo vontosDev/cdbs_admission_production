@@ -3085,7 +3085,7 @@ const getRejectRequirementIds = (type) => {
                           style={{ color: isPaymentComplete ? "#aaa" : "" }}
                           className="admission-step desc-step desc-step-succ"
                           onClick={() => {
-                            if (isPaymentComplete) {
+                            if (!isUploadComplete) {
                               return;
                             }
                             setPage("payment");
