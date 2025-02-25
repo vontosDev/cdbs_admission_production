@@ -2999,7 +2999,7 @@ const getRejectRequirementIds = (type) => {
                         <h4 className="admission-step-ls">Results</h4>
                         {toPreEnrollment && (
                         <>
-                        <h4 className="admission-step-ls">Pre-Enrollment</h4>
+                        <h4 className="admission-step-ls">Payment</h4>
                         </>)}
                       </div>
                     </div>
@@ -3156,7 +3156,7 @@ const getRejectRequirementIds = (type) => {
                             }
                           }}
                           >
-                            Pay Pre-Enrollment Fee
+                            Pay Reservation Fee
                           </h4>
                         </>)}
                         

@@ -381,7 +381,7 @@ function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }
         <div className="main-header">
           <div className="main-text-head">
             <img src={back} onClick={() => setPage("main")} />
-            <h1>Pre-Enrollment Fee Details</h1>
+            <h1>Reservation Fee Details</h1>
           </div>
           <button
             className={
@@ -405,7 +405,7 @@ function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }
           <div className="payment-summary-container">
             <p>Summary</p>
             <p className="payment-item">
-              <div>Pre-Enrollment Fee</div>
+              <div>Reservation Fee</div>
               <div>₱ 3,000.00</div>
             </p>
           </div>

@@ -118,9 +118,9 @@ function ApplicantCard({
     if(isResult && isPassed){
       if(toPreEnrollment){
         if(preEnrollmentStatus==''){
-          return { text: "Pre-Enrollment - Ready to proceed", color: "yellow" };
+          return { text: "Reservation - Ready to proceed", color: "yellow" };
         }else if(preEnrollmentStatus=='pending'){
-          return { text: "Pre-Enrollment - Ready to proceed", color: "blue" };
+          return { text: "Reservation - Ready to proceed", color: "blue" };
         }
       }else{
         return { text: "Results - Passed", color: "green" };
