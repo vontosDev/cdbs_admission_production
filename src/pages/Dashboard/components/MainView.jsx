@@ -25,6 +25,7 @@ import preKinderAssessment from "../../../assets/documents/Pre-Kinder Assessment
 import grade1Assessment from "../../../assets/documents/Grade 1 Assessment Reminder.pdf";
 import grade2to6Assessment from "../../../assets/documents/Grade 2 to 6 Assessment Reminder.pdf";
 import showEye from "../../../assets/images/showEye.svg";
+import PreEnrollmentPayment from "./preEnrollmentPayment";
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
@@ -203,6 +204,8 @@ function MainView({ setPage, page }) {
   let isResultSent;
   let isResultPending;
   let isPassed;
+  let preEnrollmentStatus;
+  let toPreEnrollment;
   let isAssessmentAttended;
 
   let requirementsRejectedArr = [];
@@ -422,8 +425,12 @@ function MainView({ setPage, page }) {
       .filter((el) => el.document_status == "rejected")
       .map((doc) => doc.requirements_type);
 
-    isPassed =
-      admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_passed"];
+    isPassed = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_passed"];
+
+    preEnrollmentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['status'] || '';
+    console.log(`This is payment status ${preEnrollmentStatus}`);
+
+    toPreEnrollment = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_preenrollment_reservation"] ?? false;
 
     isResultPending =
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -2981,7 +2988,7 @@ const getRejectRequirementIds = (type) => {
                   </div>
                 </section>
                 {admissionSelected ? (
-                  <section className="status-tracking-section">
+                  <section className="status-tracking-section"  style={toPreEnrollment ? { height: "80vh", overflowY: "scroll" , marginBottom: "40px"} : {}}>
                     <div className="tracking-section">
                       <div>
                         <h4 className="admission-step-ls">Registration</h4>
@@ -2990,6 +2997,10 @@ const getRejectRequirementIds = (type) => {
                         <h4 className="admission-step-ls">Payment</h4>
                         <h4 className="admission-step-ls">Assessment</h4>
                         <h4 className="admission-step-ls">Results</h4>
+                        {toPreEnrollment && (
+                        <>
+                        <h4 className="admission-step-ls">Pre-Enrollment</h4>
+                        </>)}
                       </div>
                     </div>
                     <StatusTracker
@@ -3016,6 +3027,8 @@ const getRejectRequirementIds = (type) => {
                         ]["is_all_required_file_uploaded"]
                       }
                       isAssessmentAttended={isAssessmentAttended}
+                      toPreEnrollment={toPreEnrollment}
+                      preEnrollmentStatus={preEnrollmentStatus}
                     />
                     <div className="tracking-desc-section">
                       <div className="desc-steps">
@@ -3109,7 +3122,11 @@ const getRejectRequirementIds = (type) => {
                         >
                           Select Schedule and Assessment Exam
                         </h4>
-                        <h4 className="admission-step  desc-step desc-step-succ last-step">
+                        <h4 className={`admission-step desc-step desc-step-succ ${
+                              !toPreEnrollment ? "last-step" : ""
+                            }`}
+                          >
+
                           {isResultSent
                             ? "Results available"
                             : "Wait for Results"}
@@ -3126,6 +3143,23 @@ const getRejectRequirementIds = (type) => {
                             </span>
                           ) : null}
                         </h4>
+                        {toPreEnrollment && (
+                        <>
+                          <h4
+                          style={{ color: preEnrollmentStatus=='paid' ? "#aaa" : "" }}
+                          className="admission-step desc-step desc-step-succ"
+                          onClick={() => {
+                            if (preEnrollmentStatus != 'paid' ) {
+                              setPage("pre-enrollment");
+                            }else{
+                              return;
+                            }
+                          }}
+                          >
+                            Pay Pre-Enrollment Fee
+                          </h4>
+                        </>)}
+                        
                       </div>
                     </div>
                     
@@ -6004,6 +6038,23 @@ const getRejectRequirementIds = (type) => {
               </div>
             </div>
           </>
+        );
+
+
+        case "pre-enrollment":
+        return (
+          <PreEnrollmentPayment
+            dataIndex={dataIndex}
+            paymethodId={
+              admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['pay_method_id'] || 0
+            }
+            applicationId={
+              admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                "admission_form_id"
+              ]
+            }
+            setPage={setPage}
+          />
         );
       default:
         return <div>hello</div>;
