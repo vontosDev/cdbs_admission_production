@@ -121,6 +121,8 @@ function ApplicantCard({
           return { text: "Reservation - Ready to proceed", color: "yellow" };
         }else if(preEnrollmentStatus=='pending'){
           return { text: "Reservation - Ready to proceed", color: "blue" };
+        }else{
+          return { text: "Requirements - Ready to proceed", color: "yellow" };
         }
       }else{
         return { text: "Results - Passed", color: "green" };
