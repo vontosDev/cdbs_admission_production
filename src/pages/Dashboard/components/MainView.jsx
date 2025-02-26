@@ -104,6 +104,7 @@ function MainView({ setPage, page }) {
     { type: "alienCert", ids: [] },
   ]);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showRequirementsModal, setRequirementsModal] = useState(false);
   const [scheduleDetails, setScheduleDetails] = useState({
     scheduleId: "",
     timeStart: "",
@@ -2912,6 +2913,64 @@ const getRejectRequirementIds = (type) => {
                 </Modal.Body>
               </Modal>
             ) : null}
+
+
+{preEnrollmentStatus == 'paid' ? (
+              <Modal show={showRequirementsModal} id="modal-container" centered>
+                {/* <Modal.Header closeButton>
+          <Modal.Title>Applicant Information</Modal.Title>
+        </Modal.Header> */}
+                <Modal.Body>
+                  <div className="payment-box">
+                    {/* <img src={wallet} className="logo-verification" /> */}
+                    <h1>Assessment Results:</h1>
+                    <h2>
+                      Remarks:{" "}
+                      <strong style={{ color: isPassed ? "green" : "red" }}>
+                        {admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]?.["is_passed"]
+                          ? "PASSED"
+                          : "FAILED"}
+                      </strong>
+                    </h2>
+                    <hr />
+                    {isPassed ? (
+                      <>
+                        <h2>Pre Enrollment Requirements</h2>
+                        <hr />
+                        <h3>1x PSA Birth Certificate (Original Copy)</h3>
+                        <h3>1x Report Card (Previous School)</h3>
+                        {admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]["admission_status"] =='PROBATIONARY' && (<>
+                        <h3>Probationary Contract</h3>
+                        </>)}
+                        <h3>
+                          Please submit the pre requirements at the school.
+                          Thank you!
+                        </h3>
+                      </>
+                    ) : null}
+
+                    {/* <hr className="payment-line" /> */}
+                    {/* <h2>{formData.email}</h2> */}
+
+                    <hr className="line-container" />
+                    <button
+                      className="btn btn-blue"
+                      onClick={() => {
+                        setRequirementsModal(false);
+                        // setPage("main");
+                      }}
+                    >
+                      Ok, got it!
+                    </button>
+                  </div>
+                </Modal.Body>
+              </Modal>
+            ) : null}
+
             <div className="main-dashboard-container">
               <div className="mobile-app-bar">
                 <img
