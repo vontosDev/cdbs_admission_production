@@ -3214,6 +3214,17 @@ const getRejectRequirementIds = (type) => {
                           }}
                           >
                             Pay Reservation Fee
+                            {preEnrollmentStatus == 'paid' ? (
+                            <span
+                              onClick={() => {
+                                console.log("clicked");
+                                setRequirementsModal(true);
+                              }}
+                              className="results-requirements"
+                            >
+                              View Pre-Enrollment Requirements
+                            </span>
+                          ) : null}
                           </h4>
                         </>)}
                       </div>
