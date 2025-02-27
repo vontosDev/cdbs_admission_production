@@ -205,6 +205,7 @@ function MainView({ setPage, page }) {
   let isResultSent;
   let isResultPending;
   let isPassed;
+  let toPreRequirement;
   let preEnrollmentStatus;
   let toPreEnrollment;
   let isAssessmentAttended;
@@ -427,6 +428,7 @@ function MainView({ setPage, page }) {
       .map((doc) => doc.requirements_type);
 
     isPassed = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_passed"];
+    toPreRequirement = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_pre_requirement_submitted"];
 
     preEnrollmentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['status'] || '';
 
@@ -3058,6 +3060,7 @@ const getRejectRequirementIds = (type) => {
                         {toPreEnrollment && (
                         <>
                         <h4 className="admission-step-ls">Payment</h4>
+                        <h4 className="admission-step-ls">Submit</h4>
                         </>)}
                       </div>
                     </div>
@@ -3087,6 +3090,7 @@ const getRejectRequirementIds = (type) => {
                       isAssessmentAttended={isAssessmentAttended}
                       toPreEnrollment={toPreEnrollment}
                       preEnrollmentStatus={preEnrollmentStatus}
+                      toPreRequirement={toPreRequirement}
                     />
                     <div className="tracking-desc-section">
                       <div className="desc-steps">
@@ -3183,11 +3187,13 @@ const getRejectRequirementIds = (type) => {
                         <h4 className={`admission-step desc-step desc-step-succ ${
                               !toPreEnrollment ? "last-step" : ""
                             }`}
+                            style={{ color: isResultSent ? "#aaa" : "" }}
                           >
 
-                          {isResultSent
+                          {/*isResultSent
                             ? "Results available"
-                            : "Wait for Results"}
+                            : "Wait for Results"*/}
+                          Assessment Result
 
                           {isResultSent ? (
                             <span
@@ -3226,6 +3232,14 @@ const getRejectRequirementIds = (type) => {
                               View Pre-Enrollment Requirements
                             </span>
                           ) : null}
+                          </h4>
+
+                          <h4
+                          style={{ color: toPreRequirement ? "#aaa" : "" }}
+                          className="admission-step desc-step desc-step-succ last-step" 
+                          >
+                            Submit Hard Copy of Requirements
+                            
                           </h4>
                         </>)}
                         
