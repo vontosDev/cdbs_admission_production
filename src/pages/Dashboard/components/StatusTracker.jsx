@@ -21,6 +21,7 @@ function StatusTracker({
   isAssessmentAttended,
   toPreEnrollment,
   preEnrollmentStatus,
+  toPreRequirement
 }) {
   return (
     <div className="steps-container ">
@@ -136,6 +137,19 @@ function StatusTracker({
             </div>
           ) : (
             <div className="circle-outline">7</div>
+          )}
+
+        <div className="dash-line"></div>
+          {toPreRequirement? (
+            <div title="Complete" className="circle">
+              <img src={check} />
+            </div>
+          ) : !toPreRequirement && preEnrollmentStatus=='paid'? (
+            <div title="Pending" className="circle circle-pending">
+              <img src={check} />
+            </div>
+          ) : (
+            <div className="circle-outline">8</div>
           )}
         </>
       )}

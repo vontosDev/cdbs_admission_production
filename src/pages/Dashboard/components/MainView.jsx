@@ -205,6 +205,7 @@ function MainView({ setPage, page }) {
   let isResultSent;
   let isResultPending;
   let isPassed;
+  let toPreRequirement;
   let preEnrollmentStatus;
   let toPreEnrollment;
   let isAssessmentAttended;
@@ -427,7 +428,7 @@ function MainView({ setPage, page }) {
       .map((doc) => doc.requirements_type);
 
     isPassed = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_passed"];
-
+    toPreRequirement = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_pre_requirement_submitted"];
     preEnrollmentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['status'] || '';
     toPreEnrollment = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_preenrollment_reservation"] ?? false;
 
@@ -3057,6 +3058,7 @@ const getRejectRequirementIds = (type) => {
                         {toPreEnrollment && (
                         <>
                         <h4 className="admission-step-ls">Payment</h4>
+                        <h4 className="admission-step-ls">Submit</h4>
                         </>)}
                       </div>
                     </div>
@@ -3226,6 +3228,15 @@ const getRejectRequirementIds = (type) => {
                             </span>
                           ) : null}
                           </h4>
+                          <h4
+                          style={{ color: toPreRequirement ? "#aaa" : "" }}
+                          className="admission-step desc-step desc-step-succ last-step" 
+                          >
+                            Submit Hard Copy of Requirements
+                            
+                          </h4>
+
+
                         </>)}
                       </div>
                     </div>
