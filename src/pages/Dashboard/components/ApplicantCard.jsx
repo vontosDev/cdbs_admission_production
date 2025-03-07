@@ -55,6 +55,7 @@ function ApplicantCard({
     const isPassed =admissionTable["is_passed"];
     const isAttended = admissionTable["db_exam_admission_schedule"]?.[0]?.["is_attended"];
     const toPreEnrollment = admissionTable["is_preenrollment_reservation"] ?? false;
+    const isPreRequire = admissionTable["is_pre_requirement_submitted"] ?? false;
     const preEnrollmentStatus = admissionTable?.["db_payments_table"]?.[0]?.['status'] || '';
     // Check application creation and status
     if (!isApplicationCreated && !isCompleteView) {
