@@ -18,6 +18,10 @@ function StatusTracker({
   isUploadCreated,
   isPaid,
   isPassed,
+  isAssessmentAttended,
+  toPreEnrollment,
+  preEnrollmentStatus,
+  toPreRequirement
 }) {
   return (
     <div className="steps-container ">
@@ -54,7 +58,7 @@ function StatusTracker({
           <img src={check} />
           {console.log('hi'+isUploadPending)} 
         </div>
-      ): isApplicationComplete ||( isApplicationPending && !isUploadComplete && isUploadPending)?(
+      ):isApplicationComplete ||( isApplicationPending && !isUploadComplete && isUploadPending)?(
         <div title="Pending" className="circle circle-waiting">
           <img src={check} />
         </div>
@@ -78,7 +82,13 @@ function StatusTracker({
         <div className="circle-outline">4</div>
       )}
       <div className="dash-line"></div>
-      {isPendingAssessment || isResultSent? (
+      {!isAssessmentAttended && isAssessmentSelected && isAssessmentAttended != null ? 
+        (
+          <div title="Complete" className="circle-reject">
+            <img src={close} />
+          </div>
+        )
+      :isPendingAssessment || isResultSent? (
         <div title="Complete" className="circle">
           <img src={check} />
         </div>
@@ -108,6 +118,40 @@ function StatusTracker({
         </div>
       ) : (
         <div className="circle-outline">6</div>
+      )}
+
+      {toPreEnrollment && (
+        <>
+          <div className="dash-line"></div>
+          {preEnrollmentStatus =='paid' ? (
+            <div title="Complete" className="circle">
+              <img src={check} />
+            </div>
+          ) : preEnrollmentStatus == '' ? (
+            <div title="Pending" className="circle circle-pending">
+              <img src={check} />
+            </div>
+          ): preEnrollmentStatus == 'pending' ? (
+            <div title="Pending" className="circle circle-waiting">
+              <img src={check} />
+            </div>
+          ) : (
+            <div className="circle-outline">7</div>
+          )}
+
+        <div className="dash-line"></div>
+          {toPreRequirement? (
+            <div title="Complete" className="circle">
+              <img src={check} />
+            </div>
+          ) : !toPreRequirement && preEnrollmentStatus=='paid'? (
+            <div title="Pending" className="circle circle-pending">
+              <img src={check} />
+            </div>
+          ) : (
+            <div className="circle-outline">8</div>
+          )}
+        </>
       )}
     </div>
   );

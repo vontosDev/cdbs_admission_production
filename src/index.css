@@ -302,7 +302,7 @@ hr {
   /* overflow: clip; */
   /* height: 80px; */
   display: flex;
-
+  
   padding: 4rem 5rem 0 5rem;
   /* background-color: blue; */
 }
@@ -462,7 +462,7 @@ hr {
 .tracking-desc-section {
   height: 100%;
   margin-left: 5rem;
-  overflow-y: auto;
+  /*overflow-y: auto;*/
 }
 
 .admission-step {
@@ -1609,7 +1609,7 @@ body {
 
 .payment-box h1 {
   display: inline-block;
-  width: 30rem;
+  width: 45rem;
   text-align: center;
   font-weight: bold;
   font-size: 2.5rem;
@@ -1625,7 +1625,7 @@ body {
 
 .payment-box h3 {
   display: inline-block;
-  width: 30rem;
+  width: 40rem;
   font-weight: normal;
   font-size: 1.9rem;
   text-align: center;
@@ -1745,4 +1745,19 @@ body {
 
 .close-btn:hover {
   background-color: darkred; /* Darker red for hover effect */
+}
+
+
+.close-icon {
+  position: absolute;
+  top: 10px;
+  right: 30px;
+  font-size: 20px;
+  color: darkblue;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.close-icon:hover {
+  color: blue;
 }
