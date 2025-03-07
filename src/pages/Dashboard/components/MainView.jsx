@@ -767,6 +767,7 @@ function MainView({ setPage, page }) {
         title: "Upload Complete",
         text: "Please wait for the files to be reviewed.",
         icon: "success",
+        allowOutsideClick:false,
       }).then((result) => {
         if (result.isConfirmed) {
           setPage("main");
@@ -2753,6 +2754,7 @@ const getRejectRequirementIds = (type) => {
     setAge(calculatedAge >= 0 ? calculatedAge : "");
   };*/
   
+  console.log('Edit value: ', edit);
 
   const clearModalRegister = () => {
     setSurname("");
