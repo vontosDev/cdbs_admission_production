@@ -116,16 +116,17 @@ function ApplicantCard({
     }
 
     if(isResult && isPassed){
-      if(toPreEnrollment){
-        if(preEnrollmentStatus==''){
+      console.log('do this',admissionData['admission_id'])
+      if(toPreEnrollment && !isPreRequire){
+        if(preEnrollmentStatus=='' || preEnrollmentStatus==null){
           return { text: "Reservation - Ready to proceed", color: "yellow" };
         }else if(preEnrollmentStatus=='pending'){
-          return { text: "Reservation - Ready to proceed", color: "blue" };
+          return { text: "Reservation - Awaiting approval", color: "blue" };
         }else{
           return { text: "Requirements - Ready to proceed", color: "yellow" };
         }
       }else{
-        return { text: "Results - Passed", color: "green" };
+        return { text: "Admission - Complete", color: "green" };
       }
       
     }
