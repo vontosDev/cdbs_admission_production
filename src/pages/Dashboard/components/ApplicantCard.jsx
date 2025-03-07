@@ -55,6 +55,7 @@ function ApplicantCard({
     const isPassed =admissionTable["is_passed"];
     const isAttended = admissionTable["db_exam_admission_schedule"]?.[0]?.["is_attended"];
     const toPreEnrollment = admissionTable["is_preenrollment_reservation"] ?? false;
+    const isPreRequire = admissionTable["is_pre_requirement_submitted"] ?? false;
     const preEnrollmentStatus = admissionTable?.["db_payments_table"]?.[0]?.['status'] || '';
     // Check application creation and status
     if (!isApplicationCreated && !isCompleteView) {
@@ -114,18 +115,19 @@ function ApplicantCard({
     if(isAssess && !isResult){
       return { text: "Results - Awaiting approval", color: "blue" };
     }
-
+    
     if(isResult && isPassed){
-      if(toPreEnrollment){
-        if(preEnrollmentStatus==''){
+      console.log('do this',admissionData['admission_id'])
+      if(toPreEnrollment && !isPreRequire){
+        if(preEnrollmentStatus=='' || preEnrollmentStatus==null){
           return { text: "Reservation - Ready to proceed", color: "yellow" };
         }else if(preEnrollmentStatus=='pending'){
-          return { text: "Reservation - Ready to proceed", color: "blue" };
+          return { text: "Reservation - Awaiting approval", color: "blue" };
         }else{
           return { text: "Requirements - Ready to proceed", color: "yellow" };
         }
       }else{
-        return { text: "Results - Passed", color: "green" };
+        return { text: "Admission - Complete", color: "green" };
       }
       
     }
