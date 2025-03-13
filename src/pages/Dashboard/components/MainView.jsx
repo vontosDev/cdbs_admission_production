@@ -24,6 +24,7 @@ import kinderAssessment from "../../../assets/documents/Kinder Assessment Remind
 import preKinderAssessment from "../../../assets/documents/Pre-Kinder Assessment Reminder.pdf";
 import grade1Assessment from "../../../assets/documents/Grade 1 Assessment Reminder.pdf";
 import grade2to6Assessment from "../../../assets/documents/Grade 2 to 6 Assessment Reminder.pdf";
+import highSchoolAssessment from "../../../assets/documents/High School Assessment Reminder.pdf";
 import showEye from "../../../assets/images/showEye.svg";
 import PreEnrollmentPayment from "./preEnrollmentPayment";
 //import StatusCircles from "./Legends"
@@ -2088,8 +2089,10 @@ const getRejectRequirementIds = (type) => {
       return preKinderAssessment;
     }else if(level_applying_for=='Grade 1' || level_applying_for=='grade 1'){
       return grade1Assessment;
-    }else{
+    }else if(level_applying_for=='Grade 2' || level_applying_for=='Grade 3' || level_applying_for=='Grade 4' || level_applying_for=='Grade 5' || level_applying_for=='Grade 6'){
       return grade2to6Assessment
+    }else{
+      return highSchoolAssessment
     }
 
   }
