@@ -5494,15 +5494,7 @@ const getRejectRequirementIds = (type) => {
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={() => {
-                    if (areRequiredFilesDownloaded()) {
                       handleUpload(requirements);
-                    } else {
-                      Swal.fire({
-                        title: "Required files not downloaded",
-                        text: "Please download all necessary files before uploading.",
-                        icon: "error",
-                      });
-                    }
                   }}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
