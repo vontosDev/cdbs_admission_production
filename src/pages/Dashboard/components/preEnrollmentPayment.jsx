@@ -16,7 +16,7 @@ function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }
   const [referenceNo, setReferenceNo] = useState("");
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const handlePayment = async (paymentId) => {
     const response = await fetch(
@@ -274,7 +274,14 @@ function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }
             </div>
             <br></br>
             <div>
-            {admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['reference_number'] == null ? (
+            {admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['reference_number'] == null ?
+            
+            isLoading ? (
+              <div className="spinner-container">
+                <div className="spinner"></div>
+              </div>
+            ):
+            (
                 <button
                   type="button"
                   onClick={async () => {
@@ -291,6 +298,7 @@ function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }
                       if (result.isConfirmed) {
                         //handlePayment(paymentId);
                         //handleRefNo();
+                        setIsLoading(true);
                         try{
                           const formData = new FormData();
                           const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
@@ -315,10 +323,12 @@ function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }
                           );
                           
                           if (fileUploadResponse.status) {
+                            setIsLoading(false);
                             Swal.fire({
                               title: "Reference No. Sent",
                               text: "Please wait for your payment to be reviewed.",
                               icon: "success",
+                              allowOutsideClick: false,
                             }).then((result) => {
                               if (result.isConfirmed) {
                                 setPage("main");

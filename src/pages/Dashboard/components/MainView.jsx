@@ -3279,11 +3279,11 @@ const getRejectRequirementIds = (type) => {
             )}
             
             <div className='main-section mobile-main' style={{
-    borderBottom: 'none', // Remove border
-    boxShadow: 'none',    // Remove shadow
-    textDecoration: 'none', // Remove underline
-  }}
->
+                borderBottom: 'none', // Remove border
+                boxShadow: 'none',    // Remove shadow
+                textDecoration: 'none', // Remove underline
+              }}
+            >
               <section className="applicant-list-section"></section>
               <section className="status-list-section">
                 {//<StatusCircles />
@@ -5501,15 +5501,7 @@ const getRejectRequirementIds = (type) => {
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={() => {
-                    if (areRequiredFilesDownloaded()) {
                       handleUpload(requirements);
-                    } else {
-                      Swal.fire({
-                        title: "Required files not downloaded",
-                        text: "Please download all necessary files before uploading.",
-                        icon: "error",
-                      });
-                    }
                   }}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
