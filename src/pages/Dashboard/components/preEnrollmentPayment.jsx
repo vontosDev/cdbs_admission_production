@@ -9,14 +9,14 @@ import AdmissionsContext from "../../../context/AdmissionsContext";
 import Swal from "sweetalert2";
 import showEye from "../../../assets/images/showEye.svg";
 
-function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
+function PreEnrollmentPayment({ setPage, dataIndex, applicationId, paymethodId }) {
   const [showModal, setShowModal] = useState(false);
   const { admissions } = useContext(AdmissionsContext);
   const [paymentId, setPaymentId] = useState("");
   const [referenceNo, setReferenceNo] = useState("");
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
-
+  const [isLoading, setIsLoading] = useState(false);
 
   const handlePayment = async (paymentId) => {
     const response = await fetch(
@@ -106,12 +106,8 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
               className="close-icon" 
               onClick={() => {
                 if (
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "paymethod_id"
-                  ] === 1 ||
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "paymethod_id"
-                  ] === 2
+                    admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['pay_method_id'] === 1 ||
+                    admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['pay_method_id'] === 2
                 ) {
                   setPage("main");
                 } else {
@@ -197,9 +193,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                   type="text"
                   placeholder=" "
                   value={
-                    admissions["admissionsArr"][dataIndex][
-                      "db_admission_table"
-                    ]["reference_no"] || referenceNo
+                    admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['reference_number'] || referenceNo
                   }
                   onChange={(e) => setReferenceNo(e.target.value)}
                   required
@@ -213,7 +207,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 padding: "8px 12px",
                 backgroundColor: 
                   fileNames.length === 0 && 
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null
+                  admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment'] == null
                     ? "#012169" // Blue color if true
                     : "gray", // Gray color if false
                 color: "#fff",
@@ -221,7 +215,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 borderRadius: "4px",
                 cursor: 
                   fileNames.length === 0 && 
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null
+                  admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment'] == null
                     ? "pointer" // Clickable if true
                     : "not-allowed", // Not clickable if false
                 width: "20rem",
@@ -229,12 +223,12 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                 fontSize: "12px",
                 opacity: 
                   fileNames.length === 0 && 
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null
+                  admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment'] == null
                     ? 1 // Fully visible if true
                     : 0.6, // Dimmed if false
               }}
               disabled={
-                !(fileNames.length === 0 && admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'] == null)
+                !(fileNames.length === 0 && admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment'] == null)
               } // Disables button when the condition is false
               onClick={() =>
                 document.getElementById("uploadInput")?.click()
@@ -280,9 +274,14 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
             </div>
             <br></br>
             <div>
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                "reference_no"
-              ] === null ? (
+            {admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['reference_number'] == null ?
+            
+            isLoading ? (
+              <div className="spinner-container">
+                <div className="spinner"></div>
+              </div>
+            ):
+            (
                 <button
                   type="button"
                   onClick={async () => {
@@ -297,18 +296,21 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                       });
 
                       if (result.isConfirmed) {
-                        handlePayment(paymentId);
+                        //handlePayment(paymentId);
                         //handleRefNo();
+                        setIsLoading(true);
                         try{
                           const formData = new FormData();
                           const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
-                          formData.append("admission_id",admissionId);
+                          formData.append("paymethod",paymentId);
+                          formData.append("payer_id",admissionId);
                           formData.append("reference_no",referenceNo);
+                          formData.append("bucket_name",'support_documents');
                           files.forEach((file, index) => {
-                            formData.append(`file`, file);
+                            formData.append(`files`, file);
                           });
                           const fileUploadResponse = await fetch(
-                            "https://donboscoapi.vercel.app/api/admission/accept_agreement",
+                            "https://donboscoapi.vercel.app/api/admission/pay_pre_enrollment",
                             {
                               method: "POST",
                               headers: {
@@ -321,10 +323,12 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                           );
                           
                           if (fileUploadResponse.status) {
+                            setIsLoading(false);
                             Swal.fire({
                               title: "Reference No. Sent",
                               text: "Please wait for your payment to be reviewed.",
                               icon: "success",
+                              allowOutsideClick: false,
                             }).then((result) => {
                               if (result.isConfirmed) {
                                 setPage("main");
@@ -362,9 +366,9 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
                                       <a
                                         id="view-upload"
                                         href={
-                                          Array.isArray(admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'])
-                                            ? admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc']
-                                            : admissions["admissionsArr"][dataIndex]["db_admission_table"]['payment_doc'].replace(/[\[\]"]/g, "")
+                                          Array.isArray(admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment'])
+                                            ? admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment']
+                                            : admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['proof_of_payment'].replace(/[\[\]"]/g, "")
                                         }
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -387,7 +391,7 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
         <div className="main-header">
           <div className="main-text-head">
             <img src={back} onClick={() => setPage("main")} />
-            <h1>Admission Fee Details</h1>
+            <h1>Reservation Fee Details</h1>
           </div>
           <button
             className={
@@ -411,13 +415,13 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
           <div className="payment-summary-container">
             <p>Summary</p>
             <p className="payment-item">
-              <div>Admission Fee</div>
-              <div>₱ 600.00</div>
+              <div>Reservation Fee</div>
+              <div>₱ 3,000.00</div>
             </p>
           </div>
           <div className="total-amount-container">
             <p>Total Balance</p>
-            <p id="total">₱ 600.00</p>
+            <p id="total">₱ 3,000.00</p>
           </div>
         </div>
         <div className="payment-options-container">
@@ -449,4 +453,4 @@ function Payment({ setPage, dataIndex, applicationId, paymethodId }) {
   );
 }
 
-export default Payment;
+export default PreEnrollmentPayment;

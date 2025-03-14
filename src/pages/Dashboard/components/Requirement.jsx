@@ -19,6 +19,8 @@ function Requirement({
   dataIndex,
   handleRequirements,
   isRejected,
+  setDownloadedFiles,
+  downloadedFiles
 }) {
   const [fileNames, setFileNames] = useState([]);
   const [files, setFiles] = useState([]);
@@ -30,9 +32,8 @@ function Requirement({
   .map((el) => el.document_status);
   const requiredDocumentsTable  = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_required_documents_table"]
   .filter((el) => el.reject_reason && typeId === el.requirements_type) // Filter by reject_reason and typeId
-  .map((el) => el.reject_reason);
+  .map((el) => el.reject_reason)[0];
   const isPendingOrAccepted = documentStatus && (documentStatus === "pending" || documentStatus === "accepted");
-  
   const hiddenFileInput = useRef(null);
   let uploadedFiles = [];
   let type;
@@ -147,9 +148,80 @@ function Requirement({
     return true;
   };
 
-  const handleClick = (event) => {
+  const handleClick = (type) => (event) => {
+    // Check if the type is one of the restricted ones
+    if (["parentQuestionnaire", "nonCatholicWaiver"].includes(type)) {
+      if (!downloadedFiles[type]) return; // Prevent clicking if not downloaded
+    }
+  
     hiddenFileInput.current.click();
   };
+  
+  
+
+  const markFileAsDownloaded = (type) => {
+    setDownloadedFiles((prev) => {
+      if (type === 5) {
+        return { ...prev, recoLetter: { ...prev.recoLetter, teacher: true } };
+      } else if (type === 15) {
+        return { ...prev, recoLetter: { ...prev.recoLetter, schoolHead: true } };
+      } else if (type === "nonCatholicWaiver") {
+        return { ...prev, nonCatholicWaiver: true };
+      } else if (type === "parentQuestionnaire") {
+        return { ...prev, parentQuestionnaire: true };
+      }
+      return prev;
+    });
+  };
+
+  
+  const handleDownload = async (e, type, fileUrl) => {
+    e.preventDefault();
+    if (isPendingOrAccepted || !fileUrl) return;
+  
+    try {
+      const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
+      const formData = new FormData();
+      formData.append("admission_id", admissionId);
+      formData.append("requirements_type", type.toString());
+  
+      const fileUploadResponse = await fetch(
+        "https://donboscoapi.vercel.app/api/admission/upload_requirements",
+        {
+          method: "POST",
+          headers: {
+            "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+            "supabase-key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+          },
+          body: formData,
+        }
+      );
+  
+      console.log(await fileUploadResponse.json());
+      fetchAdmissions();
+  
+      // Mark the file as downloaded
+      markFileAsDownloaded(type);
+      if(type===''){
+
+      }
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download =
+        type === 5
+          ? "recommendation-teacher.pdf"
+          : type === 15
+          ? "recommendation-school-head-counselor.pdf"
+          : `${type}.pdf`;
+  
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+  
 
   return (
     <div
@@ -320,25 +392,6 @@ function Requirement({
               </>
             ) : null}
 
-            {/*fileNames.map((el, i) => (
-              <div className="item-upload" key={i}>
-                <h2 className="file-text">{el}</h2>
-                <span
-                  className="delete-upload-item"
-                  onClick={() => {
-                    setFiles((prevFiles) =>
-                      prevFiles.filter((el) => el !== el.name[i])
-                    );
-                    setFileNames((prevFiles) =>
-                      prevFiles.filter((elFile) => elFile !== el)
-                    );
-                    handleFileChange(type, files);
-                  }}
-                >
-                  X
-                </span>
-              </div>
-            ))*/}
             {fileNames.map((el, i) => (
               <div className="item-upload" key={i}>
                 <h2 className="file-text">{el}</h2>
@@ -365,58 +418,44 @@ function Requirement({
             ))}
 
 
-
-            {/*mainTitle != "Recommendation Letter"
-              ? uploadedFiles.map((el, i) => (
-                  <div className="upload-view-btn-container" key={i}>
-                    <a
-                      id="view-upload"
-                      href={
-                        Array.isArray(el.document_url)
-                          ? el.document_url[0]
-                          : el.document_url.replace(/[\[\]"']/g, "")
-                      }
-                      key={i}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span className="btn-view">
-                        <img src={showEye} /> Uploaded File
-                      </span>
-                    </a>
-                    <button
-                      className="close-btn"
-                      onClick={async () => {
-                        var result = await Swal.fire({
-                          title: "Delete this uploaded file?",
-                          icon: "warning",
-                          showCancelButton: true,
-                          confirmButtonText: "Yes",
-                          cancelButtonColor: "No",
-                        });
-                        if (result.isConfirmed) {
-                          await handleDeleteUploadedFiles(
-                            el.requirements_type,
-                            el.admission_id,
-                            el.required_doc_id
-                          );
-
-                          fetchAdmissions();
-                        } else {
-                          return;
-                        }
-                      }} // Function to remove file
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))
-              : null*/}
-
               {mainTitle !== "Recommendation Letter"
                 ? uploadedFiles.map((el, i) => (
                     <div className="upload-view-btn-container" key={i}>
+                      {
                       <a
+                        id="view-upload"
+                        href={el.document_url[0]}  // Use the first URL in the array for the href
+                        key={i}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent the default link behavior
+                      
+                          // If `el.document_url` is a string, split it by commas to get an array of URLs
+                          const urls = typeof el.document_url === 'string'
+                            ? el.document_url.split(',').map(url => url.trim()) // Split and trim URLs
+                            : Array.isArray(el.document_url)
+                            ? el.document_url // If already an array, use it directly
+                            : []; // Default to an empty array if neither string nor array
+                      
+                          // Log the URLs to check the result
+                          console.log(urls);
+                      
+                          // Open each URL in a new tab
+                          urls.forEach((url) => {
+                            const cleanUrl = url.replace(/[\[\]"']/g, "");  // Clean any unwanted characters like brackets or quotes
+                            console.log(`Opening URL: ${cleanUrl}`); // Log which URL is being opened
+                            window.open(cleanUrl, '_blank');  // Open the cleaned URL in a new tab
+                          });
+                        }}
+                    >
+                      <span className="btn-view">
+                        <img src={showEye} alt="view" /> Uploaded File
+                      </span>
+                    </a>
+                    
+                    
+                      /*<a
                         id="view-upload"
                         href={
                           Array.isArray(el.document_url)
@@ -426,11 +465,22 @@ function Requirement({
                         key={i}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => {
+                          e.preventDefault(); // Prevent the default link behavior
+                      
+                          // If document_url is an array, loop through each URL and open it in a new tab
+                          const urls = Array.isArray(el.document_url) ? el.document_url : [el.document_url];
+                      
+                          // Open each URL in a new tab
+                          urls.forEach(url => {
+                            window.open(url, '_blank');
+                          });
+                        }}
                       >
                         <span className="btn-view">
                           <img src={showEye} /> Uploaded File
                         </span>
-                      </a>
+                      </a>*/}
                       {(el.document_status !== "accepted" && !isRequiredViewing) && (  // Check if file is not approved or hasn't been uploaded yet
                         <button
                           className="close-btn"
@@ -466,151 +516,55 @@ function Requirement({
 
           <div className="align-buttons-self">
             {mainTitle === "Parent Questionnaire" ? (
-              <a href={parentQuestionnaire} download="parent-questionnaire">
+              //<a href={parentQuestionnaire} download="parent-questionnaire">
                 <button
                   className="btn-blue btn btn-add"
                   style={{ width: "230px" }}
+                  onClick={(e) => handleDownload(e, "parentQuestionnaire", parentQuestionnaire)}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Download Questionnaire
                 </button>
-              </a>
+              //</a>
               
             ) : null}
-            {mainTitle === "Recommendation Letter" ? (
-              <a href={recommendTeacher} download="recommendation-teacher">
-                <button
-                  className={`btn-blue btn btn-add ${isPendingOrAccepted ? "disabled" : ""}`}
-                  style={{ width: "295px" }}
-                  onClick={async (e) => {
-                    //e.preventDefault();
-                    if(isPendingOrAccepted){
-                      e.preventDefault();
-                    }else{
-                      try{
-                        const formData = new FormData();
-                        const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
-                        formData.append("admission_id",admissionId);
-                        formData.append("requirements_type",5);
-                        const fileUploadResponse = await fetch(
-                          "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
-                          {
-                            method: "POST",
-                            headers: {
-                              "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
-                              "supabase-key":
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
-                            },
-                            body: formData,
-                          }
-                        );
-                
-                        // Log the response for debugging purposes
-                        console.log(await fileUploadResponse.json());
-                        fetchAdmissions();
-                      }catch (error) {
-                        console.error("Error uploading file:", error);
-                      }
-                    }
-                    
-              
-                  }
-                }
-                  // onClick={addApplicant}
-                  // onClick={() => setPage("personal-form")}
-                >
-                  Download Class Adviser or Subject Teacher
-                </button>
-              </a>
-            ) : null}
-            {mainTitle === "Recommendation Letter" ? (
-              <a
-                href={recommendSchoolHead}
-                download="recommendation-school-head-counselor"
-              >
-                <button
-                  className={`btn-blue btn btn-add reco-pad-left ${isPendingOrAccepted ? "disabled" : ""}`}
-                  style={{ width: "290px" }}
-                  onClick={async (e) => {
-                    if(isPendingOrAccepted){
-                      e.preventDefault();
-                    }else{
-                      try{
-                        const formData = new FormData();
-                        const admissionId = admissions["admissionsArr"][dataIndex]["admission_id"];
-                        formData.append("admission_id",admissionId);
-                        formData.append("requirements_type",5);
-                        const fileUploadResponse = await fetch(
-                          "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
-                          {
-                            method: "POST",
-                            headers: {
-                              "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
-                              "supabase-key":
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
-                            },
-                            body: formData,
-                          }
-                        );
-                
-                        // Log the response for debugging purposes
-                        console.log(await fileUploadResponse.json());
-                        fetchAdmissions();
-                      }catch (error) {
-                        console.error("Error uploading file:", error);
-                      }
-                    }
-              
-                  }
-                }
-                  // onClick={addApplicant}
-                  // onClick={() => setPage("personal-form")}
-                >
-                  Download School Head or Counselor
-                </button>
-              </a>
-            ) : null}
+            {mainTitle === "Recommendation Letter" && (
+                <>
+                  <button
+                    className={`btn-blue btn btn-add ${isPendingOrAccepted ? "disabled" : ""}`}
+                    style={{ width: "295px" }}
+                    onClick={(e) => handleDownload(e, 5, recommendTeacher)}
+                  >
+                    Download Class Adviser or Subject Teacher
+                  </button>
+
+                  <button
+                    className={`btn-blue btn btn-add reco-pad-left ${isPendingOrAccepted ? "disabled" : ""}`}
+                    style={{ width: "290px" }}
+                    onClick={(e) => handleDownload(e, 15, recommendSchoolHead)}
+                  >
+                    Download School Head or Counselor
+                  </button>
+                </>
+              )
+              }
             {mainTitle === "Non-Catholic Waiver" ? (
-              <a href={nonCatholicWaiver} download="non-catholic-waiver">
+              //<a href={nonCatholicWaiver} download="non-catholic-waiver">
                 <button
                   className="btn-blue btn btn-add reco-pad-left"
                   style={{ width: "230px" }}
+                  onClick={(e) => handleDownload(e, "nonCatholicWaiver", nonCatholicWaiver)}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Download Non-Catholic Waiver
                 </button>
-              </a>
+              //</a>
             ) : null}
           </div>
         </div>
       </div>
-
-      {/*mainTitle != "Recommendation Letter" && uploadedFiles.length ==0 ? (
-        <div className="attachment-icon">
-          <input
-            ref={hiddenFileInput}
-            className="attach" style={{ marginTop: "70px", marginBottom: "70px"  }}
-            type="file"
-            accept=".png, .jpeg, .jpg, .pdf"
-            multiple
-            onChange={(e) => {
-              const files = Array.from(e.target.files);
-              if (handleFileChange(type, files)) {
-                setFileNames(files.map((file) => file.name) || null);
-              }
-            }}
-          />
-
-          <img
-            className="attachment-icon-button"
-            src={attachment}
-            onClick={handleClick}
-          />
-        </div>
-      ) : null*/
-      }
 
       {mainTitle !== "Recommendation Letter" && (
         (uploadedFiles.length === 0 || uploadedFiles.some((file) => file.document_status === "rejected")) && (
@@ -634,7 +588,8 @@ function Requirement({
             <img
               className="attachment-icon-button"
               src={attachment}
-              onClick={handleClick}
+              onClick={handleClick(type)}
+              hidden={type==='parentQuestionnaire'|| type==='nonCatholicWaiver'?!downloadedFiles[type]:false}
             />
           </div>
         )

@@ -20,11 +20,17 @@ import { createClient } from "@supabase/supabase-js";
 import circle_cross from "../../../assets/images/circle_cross.png";
 import Flatpickr from "react-flatpickr";
 import "../../../assets/themes/material_blue.css";
-
+import kinderAssessment from "../../../assets/documents/Kinder Assessment Reminder.pdf";
+import preKinderAssessment from "../../../assets/documents/Pre-Kinder Assessment Reminder.pdf";
+import grade1Assessment from "../../../assets/documents/Grade 1 Assessment Reminder.pdf";
+import grade2to6Assessment from "../../../assets/documents/Grade 2 to 6 Assessment Reminder.pdf";
+import highSchoolAssessment from "../../../assets/documents/High School Assessment Reminder.pdf";
+import showEye from "../../../assets/images/showEye.svg";
+import PreEnrollmentPayment from "./preEnrollmentPayment";
 //import StatusCircles from "./Legends"
 function MainView({ setPage, page }) {
 
-  const supabase = createClient('https://ligqdgmwtziqytxyqpvv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8');
+  const supabase = createClient('https://srseiyeepchrklzxawsm.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU');
 
   const [realTimeChannel, setRealTimeChannel] = useState(null);
   const maxDate = new Date();
@@ -58,7 +64,17 @@ function MainView({ setPage, page }) {
   const [uploadStatus, setUploadStatus] = useState("");
   const [edit, setEdit] = useState(false);
   const [dobHandled, setDobHandled] = useState(false);
+  
+  const [downloadedFiles, setDownloadedFiles] = useState({
+    recoLetter: { teacher: false, schoolHead: false },
+    nonCatholicWaiver: false,
+    parentQuestionnaire: false,
+  });
 
+
+  
+  
+  
   
   const [requirements, setRequirements] = useState([
     { type: "birthCert", file: [] },
@@ -89,6 +105,7 @@ function MainView({ setPage, page }) {
     { type: "alienCert", ids: [] },
   ]);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [showRequirementsModal, setRequirementsModal] = useState(false);
   const [scheduleDetails, setScheduleDetails] = useState({
     scheduleId: "",
     timeStart: "",
@@ -96,6 +113,11 @@ function MainView({ setPage, page }) {
     location: "",
     date: "",
   });
+
+
+
+  
+  
 
   const [showReschedModal, setShowReschedModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
@@ -124,6 +146,46 @@ function MainView({ setPage, page }) {
   const [cities, setCities] = useState([]);
   const [selectedIdCity, setSelectedIdCity] = useState([]);
   const [baranggays, setBaranggays] = useState([]);
+
+
+  const checkExamStatus = (date, start_time, end_time) => {
+    const today = new Date();
+    const examDateObj = new Date(date); // Convert string date to Date object
+    today.setHours(0, 0, 0, 0);
+    examDateObj.setHours(0, 0, 0, 0);
+    // Check if the exam date is in the past
+    if (today > examDateObj) {
+      // If today is after the exam date, the exam has passed
+      return true;
+    }
+  
+    // Check if today is the exam date
+    if (today.toDateString() === examDateObj.toDateString()) {
+      const currentTime = new Date();
+  
+      // Convert start_time and end_time to Date objects for comparison
+      const [startHour, startMinutePart] = start_time.split(":");
+      const startMinute = startMinutePart.split(" ")[0]; // Get minute part before AM/PM
+      const startPeriod = startMinutePart.split(" ")[1]; // Get AM/PM
+  
+      const [endHour, endMinutePart] = end_time.split(":");
+      const endMinute = endMinutePart.split(" ")[0]; // Get minute part before AM/PM
+      const endPeriod = endMinutePart.split(" ")[1]; // Get AM/PM
+  
+      // Convert to 24-hour format (for both start_time and end_time)
+      const startHour24 = startPeriod === "PM" ? parseInt(startHour) + 12 : parseInt(startHour);
+      const endHour24 = endPeriod === "PM" ? parseInt(endHour) + 12 : parseInt(endHour);
+  
+      const startTimeObj = new Date(currentTime.setHours(startHour24, startMinute, 0, 0));
+      const endTimeObj = new Date(currentTime.setHours(endHour24, endMinute, 0, 0));
+  
+      // Return true if the current time is past the exam's end time, meaning the exam has passed
+      return currentTime > endTimeObj || currentTime >=startTimeObj;
+    }
+  
+    return false; // Return false if it's not the exam date
+  };
+  
   
   const userId = localStorage.getItem("userId");
 
@@ -138,11 +200,16 @@ function MainView({ setPage, page }) {
   let isAssessmentPending;
   let isPaymentComplete;
   let isPaymentPending;
+  const [countAssessment, setCountAssessment] = useState(0);
   let isAssessmentSelected;
   let isPendingAssessment;
   let isResultSent;
   let isResultPending;
   let isPassed;
+  let toPreRequirement;
+  let preEnrollmentStatus;
+  let toPreEnrollment;
+  let isAssessmentAttended;
 
   let requirementsRejectedArr = [];
 
@@ -151,14 +218,14 @@ function MainView({ setPage, page }) {
       setIsLoading(forLoading);
     }
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -176,18 +243,24 @@ function MainView({ setPage, page }) {
     setIsLoading(false);
   };
 
+  //calculate date if difference is 2 days
+  const getDateDifferenceInDays = (date1, date2) => {
+    const diffTime = Math.abs(date2 - date1);
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)); // Converts time difference to days
+  };
+
  /* const getUserAdmissions = async (forLoading) => {
     if (page === "main" || page === "upload") {
       setIsLoading(forLoading);
     }
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": 'https://ligqdgmwtziqytxyqpvv.supabase.co',
-          "supabase-key": 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8',
+          "supabase-url": 'https://srseiyeepchrklzxawsm.supabase.co',
+          "supabase-key": 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU',
         },
         body: JSON.stringify({
           user_id: userId,
@@ -281,14 +354,14 @@ function MainView({ setPage, page }) {
   ) => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/remove_requirements",
+      "https://donboscoapi.vercel.app/api/admission/remove_requirements",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           requirements_type: requirementType,
@@ -300,6 +373,8 @@ function MainView({ setPage, page }) {
     getUserAdmissions(false);
     console.log(await response.json());
   };
+
+  console.log(dataIndex)
 
   const getLengthRequirements = () => {
     const levelApplyingFor =
@@ -341,7 +416,7 @@ function MainView({ setPage, page }) {
     if (religion != "Roman Catholic") {
       requirementSet.push("non-catholic-waiver");
     }
-    console.log(requirementSet.length);
+    console.log(`this the ${requirementSet.length}`);
     console.log(`REQ: ${requirementSet}`);
     return requirementSet.length;
   };
@@ -353,8 +428,12 @@ function MainView({ setPage, page }) {
       .filter((el) => el.document_status == "rejected")
       .map((doc) => doc.requirements_type);
 
-    isPassed =
-      admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_passed"];
+    isPassed = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_passed"];
+    toPreRequirement = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_pre_requirement_submitted"];
+
+    preEnrollmentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['status'] || '';
+
+    toPreEnrollment = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_preenrollment_reservation"] ?? false;
 
     isResultPending =
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -456,6 +535,14 @@ function MainView({ setPage, page }) {
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
         "db_exam_admission_schedule"
       ].length > 0;
+
+
+    if(isAssessmentSelected>0){
+      //setCountAssessment(isAssessmentSelected);
+      isAssessmentAttended= admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "db_exam_admission_schedule"
+      ][0]["is_attended"];
+    }
   }
 
   // console.log(isApplicationComplete);
@@ -465,10 +552,10 @@ function MainView({ setPage, page }) {
 
     // Create a Date object with the given time (assuming today's date)
     const date = new Date();
-    date.setHours(hours, minutes);
+    date.setHours(hours, minutes,0);
 
     // Use toLocaleString to format the time in 12-hour AM/PM format
-    const options = { hour: "numeric", minute: "numeric", hour12: true };
+    const options = { hour: "2-digit", minute: "2-digit", hour12: true };
     return date.toLocaleString("en-US", options);
   }
 
@@ -577,13 +664,157 @@ function MainView({ setPage, page }) {
       }
     }
 
+    // Create an array to store promises for concurrent uploads
+    const uploadPromises = [];
+
+    for (let requirement of requirements) {
+      if (requirement.file.length === 0) continue; // Skip if no files for this requirement
+
+      const formData = new FormData();
+      formData.append("bucket_name", "document_upload");
+      
+      // Append multiple files
+      requirement.file.forEach(file => {
+        formData.append("files", file);
+      });
+
+      // Add requirements_type based on the requirement type
+      let requirementType;
+      let docRequiredIds = [];
+
+      switch (requirement.type) {
+        case "birthCert":
+          requirementType = 1;
+          docRequiredIds = getRejectRequirementIds("birthCert");
+          break;
+        case "recentIdPhoto":
+          requirementType = 2;
+          docRequiredIds = getRejectRequirementIds("recentIdPhoto");
+          break;
+        case "reportPreviousCard":
+          requirementType = 3;
+          docRequiredIds = getRejectRequirementIds("reportPreviousCard");
+          break;
+        case "reportPresentCard":
+          requirementType = 14;
+          docRequiredIds = getRejectRequirementIds("reportPresentCard");
+          break;
+        case "parentQuestionnaire":
+          requirementType = 4;
+          docRequiredIds = getRejectRequirementIds("parentQuestionnaire");
+          break;
+        case "baptismalCert":
+          requirementType = 8;
+          docRequiredIds = getRejectRequirementIds("baptismalCert");
+          break;
+        case "communionCert":
+          requirementType = 9;
+          docRequiredIds = getRejectRequirementIds("communionCert");
+          break;
+        case "marriageCert":
+          requirementType = 10;
+          docRequiredIds = getRejectRequirementIds("marriageCert");
+          break;
+        case "recoLetter":
+          requirementType = 5;
+          docRequiredIds = getRejectRequirementIds("recoLetter");
+          break;
+        case "nonCatholicWaiver":
+          requirementType = 13;
+          docRequiredIds = getRejectRequirementIds("nonCatholicWaiver");
+          break;
+        case "alienCert":
+          requirementType = 11;
+          docRequiredIds = getRejectRequirementIds("alienCert");
+          break;
+        case "passport":
+          requirementType = 12;
+          docRequiredIds = getRejectRequirementIds("passport");
+          break;
+        default:
+          break;
+      }
+
+      formData.append("requirements_type", requirementType);
+      
+      // Append reject IDs to formData if any
+      docRequiredIds.forEach(id => {
+        formData.append("doc_required_id", id);
+      });
+
+      formData.append("admission_id", admissionSelected);
+
+      // Push the upload promise to the array
+      uploadPromises.push(
+        fetch("https://donboscoapi.vercel.app/api/admission/upload_requirements", {
+          method: "POST",
+          headers: {
+            "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
+            "supabase-key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
+          },
+          body: formData,
+        }).then((response) => response.json())
+      );
+    }
+
+    try {
+      // Wait for all uploads to complete
+      const uploadResults = await Promise.all(uploadPromises);
+      console.log(uploadResults);
+
+      // If all uploads are successful
+      setIsLoading(false);
+      Swal.fire({
+        title: "Upload Complete",
+        text: "Please wait for the files to be reviewed.",
+        icon: "success",
+        allowOutsideClick:false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setPage("main");
+        }
+      });
+    } catch (error) {
+      setIsLoading(false);
+      console.error("Error uploading files:", error);
+      Swal.fire({
+        title: "Upload Failed",
+        text: "There was an error uploading your files. Please try again.",
+        icon: "error",
+      });
+    }
+};
+
+const getRejectRequirementIds = (type) => {
+  // Return the list of rejected document ids based on the type
+  const rejectDoc = rejectRequirementIds.find(el => el.type === type);
+  return rejectDoc ? rejectDoc.ids : [];
+};
+
+
+  /*const handleUpload = async () => {
+    setIsLoading(true);
+    console.log(requirements);
+    const lengthReq = getLengthRequirements();
+    console.log(`UPLOAD: ${lengthReq}`);
+
+    if (!edit) {
+      if (
+        lengthReq != requirements.filter((rqmt) => rqmt.file.length > 0).length
+      ) {
+        console.log("do not upload");
+        setIsLoading(false);
+        return;
+      }
+    }
+
     for (let requirement of requirements) {
       if (requirement.file.length === 0) continue; // Skip if no files for this requirement
 
       for (let file of requirement.file) {
         const formData = new FormData();
         formData.append("bucket_name", "document_upload");
-        formData.append("file", file);
+        formData.append("files", file);
         // formData.append("");
 
         // Add requirements_type based on the requirement type
@@ -763,13 +994,13 @@ function MainView({ setPage, page }) {
 
         try {
           const fileUploadResponse = await fetch(
-            "https://dbs-api-live.vercel.app/api/admission/upload_requirements",
+            "https://donboscoapi.vercel.app/api/admission/upload_requirements",
             {
               method: "POST",
               headers: {
-                "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+                "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
                 "supabase-key":
-                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+                  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
               },
               body: formData,
             }
@@ -791,7 +1022,7 @@ function MainView({ setPage, page }) {
         setPage("main");
       }
     });
-  };
+  };*/
 
   const handleShowCalendarModal = () => {
     setShowCalendarModal((prev) => !prev);
@@ -931,6 +1162,7 @@ function MainView({ setPage, page }) {
       available: false,
     },
   ]);
+  
 
   const [personalData, setPersonalData] = useState({
     levelApplyingFor: "",
@@ -1056,14 +1288,14 @@ function MainView({ setPage, page }) {
   const handleSlotCheck = async () => {
     setSlotsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/check_slot",
+      "https://donboscoapi.vercel.app/api/admission/check_slot",
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
       }
     );
@@ -1223,14 +1455,14 @@ function MainView({ setPage, page }) {
       revisedLevelString = "Grade 7 - 12";
     }*/
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/reserve_slot_exam",
+      "https://donboscoapi.vercel.app/api/admission/reserve_slot_exam",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           schedule_id: scheduleId,
@@ -1405,14 +1637,14 @@ function MainView({ setPage, page }) {
 
   const handlePersonalSubmission = async () => {
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_admission",
+      "https://donboscoapi.vercel.app/api/admission/create_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1448,14 +1680,14 @@ function MainView({ setPage, page }) {
 
   const handleAcademicSubmission = async () => {
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_academic_background",
+      "https://donboscoapi.vercel.app/api/admission/create_academic_background",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1489,14 +1721,14 @@ function MainView({ setPage, page }) {
     console.log(`LIST: ${JSON.stringify(listA)}`);
 
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_family_background_siblings",
+      "https://donboscoapi.vercel.app/api/admission/create_family_background_siblings",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1586,14 +1818,14 @@ function MainView({ setPage, page }) {
 
     console.log(`BACKID: ${backgroundSelected}`);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_family_background_parent",
+      "https://donboscoapi.vercel.app/api/admission/create_family_background_parent",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           background_id: parseInt(backgroundSelected),
@@ -1637,13 +1869,13 @@ function MainView({ setPage, page }) {
   
       // Send POST request
       const fileUploadResponse = await fetch(
-        "https://dbs-api-live.vercel.app/api/admission/create_special_concern",
+        "https://donboscoapi.vercel.app/api/admission/create_special_concern",
         {
           method: "POST",
           headers: {
-            "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+            "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
             "supabase-key":
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
           },
           body: formData,
         }
@@ -1674,14 +1906,14 @@ function MainView({ setPage, page }) {
   const handleSchedCancellation = async (easId, cancelReason) => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/cancel-schedule",
+      "https://donboscoapi.vercel.app/api/admission/cancel-schedule",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           eas_id: easId,
@@ -1704,14 +1936,14 @@ function MainView({ setPage, page }) {
   const handleSurveySubmission = async () => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/create_survey",
+      "https://donboscoapi.vercel.app/api/admission/create_survey",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1728,14 +1960,14 @@ function MainView({ setPage, page }) {
   const handleAgreementDeclaration = async () => {
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/accept_agreement",
+      "https://donboscoapi.vercel.app/api/admission/accept_agreement",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1778,14 +2010,14 @@ function MainView({ setPage, page }) {
     }*/
 
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/check_exam_schedule",
+      "https://donboscoapi.vercel.app/api/admission/check_exam_schedule",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           level_applying_for: revisedLevelString,
@@ -1813,20 +2045,97 @@ function MainView({ setPage, page }) {
     setIsLoading(false);
   };
 
+  // Function to check if required files are downloaded
+  const areRequiredFilesDownloaded = () => {
+    const { recoLetter, nonCatholicWaiver, parentQuestionnaire } = downloadedFiles;
+    // Check if required files are downloaded
+    
+    const isParentAndWaiverDownloaded = parentQuestionnaire && nonCatholicWaiver;
+    const isRecoLetterComplete = recoLetter.teacher && recoLetter.schoolHead;
+    const isNonCatholicOnly = nonCatholicWaiver && !parentQuestionnaire && !isRecoLetterComplete;
+    const isParentOnly = parentQuestionnaire && !nonCatholicWaiver && !isRecoLetterComplete;
+    if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+      "religion"
+    ] != "Roman Catholic"){
+      return (
+        isParentAndWaiverDownloaded || // Parent Questionnaire only (if no other requirement exists)
+        (isRecoLetterComplete && nonCatholicWaiver) // Both reco letters + non-Catholic waiver
+      );
+    }else{
+      if(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "level_applying_for"
+      ] == "Kinder" ||
+      admissions["admissionsArr"][dataIndex]["db_admission_table"][
+        "level_applying_for"
+      ] == "Pre-Kinder"){
+        return (
+          isParentOnly
+        );
+      }else{
+        return (
+          isRecoLetterComplete
+        );
+      }
+    }
+    
+  };
+
+
+  const getLevelAssessmentReminder=(level_applying_for)=>{
+
+    if(level_applying_for=='Kinder' || level_applying_for=='kinder'){
+      return kinderAssessment;
+    }else if(level_applying_for=='Pre-Kinder' || level_applying_for=='pre-kinder'){
+      return preKinderAssessment;
+    }else if(level_applying_for=='Grade 1' || level_applying_for=='grade 1'){
+      return grade1Assessment;
+    }else if(level_applying_for=='Grade 2' || level_applying_for=='Grade 3' || level_applying_for=='Grade 4' || level_applying_for=='Grade 5' || level_applying_for=='Grade 6'){
+      return grade2to6Assessment
+    }else{
+      return highSchoolAssessment
+    }
+
+  }
+
+  const getRequiredDocumentsCount = (level_applying_for, religion, citizenship) => {
+    if (level_applying_for === "Kinder" || level_applying_for === "Pre-Kinder" || level_applying_for === "Grade 1") {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 5;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino"){
+        return 4;
+      }else{
+        return 3;
+      }
+    } else {
+      if (religion !== "Roman Catholic" && citizenship !== "Filipino") {
+        return 7;
+      } else if (religion === "Roman Catholic" && citizenship !== "Filipino") {
+        return 6;
+      } else if (religion !== "Roman Catholic" && citizenship === "Filipino") {
+        return 5;
+      } else {
+        return 4;
+      }
+    }
+  };
+
+
   const getAdmissionData = async () => {
     setIsLoading(true);
     console.log(`SELECTED: ${admissionSelected}`);
     if (page == "main") {
     }
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/get_user_admission",
+      "https://donboscoapi.vercel.app/api/admission/get_user_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionSelected,
@@ -1868,6 +2177,10 @@ function MainView({ setPage, page }) {
         handleFetchBaranggays(city);
         barangay = addressArr[1];
       }
+
+
+
+      
 
       return {
         levelApplyingFor:
@@ -2133,14 +2446,14 @@ function MainView({ setPage, page }) {
 
     setIsLoading(true);
     const response = await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/register_admission",
+      "https://donboscoapi.vercel.app/api/admission/register_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           user_id: userId,
@@ -2444,6 +2757,7 @@ function MainView({ setPage, page }) {
     setAge(calculatedAge >= 0 ? calculatedAge : "");
   };*/
   
+  console.log('Edit value: ', edit);
 
   const clearModalRegister = () => {
     setSurname("");
@@ -2468,6 +2782,7 @@ function MainView({ setPage, page }) {
     console.log(decodedUser);
     setUser(decodedUser);
   };
+
 
   useEffect(() => {
     if (user["registryType"] === "learner") {
@@ -2545,27 +2860,49 @@ function MainView({ setPage, page }) {
                     <h1>Assessment Results:</h1>
                     <h2>
                       Remarks:{" "}
-                      <strong style={{ color: isPassed ? "green" : "red" }}>
+                      <strong style={{ color: isPassed ? "green" : "#c8102e" }}>
                         {admissions["admissionsArr"][dataIndex][
                           "db_admission_table"
-                        ]?.["is_passed"]
-                          ? "PASSED"
-                          : "FAILED"}
+                        ]?.["admission_status"]}
                       </strong>
                     </h2>
                     <hr />
-                    {isPassed ? (
+                    
                       <>
-                        <h2>Pre Enrollment Requirements</h2>
                         <hr />
-                        <h3>1x PSA Birth Certificate (Original Copy)</h3>
-                        <h3>1x Report Card (Previous School)</h3>
                         <h3>
-                          Please submit the pre requirements at the school.
-                          Thank you!
-                        </h3>
+                        <a
+                                                id="view-upload"
+                                                href={admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc']}  // Use the first URL in the array for the href
+                                              
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => {
+                                                  e.preventDefault(); // Prevent the default link behavior
+                                              
+                                                  // If `el.document_url` is a string, split it by commas to get an array of URLs
+                                                  const urls = typeof admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'] === 'string'
+                                                    ? admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'].split(',').map(url => url.trim()) // Split and trim URLs
+                                                    : Array.isArray(admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'])
+                                                    ? admissions["admissionsArr"][dataIndex]["db_admission_table"]['result_doc'] // If already an array, use it directly
+                                                    : []; // Default to an empty array if neither string nor array
+                                              
+                                                  // Log the URLs to check the result
+                                                  console.log(urls);
+                                              
+                                                  // Open each URL in a new tab
+                                                  urls.forEach((url) => {
+                                                    const cleanUrl = url.replace(/[\[\]"']/g, "");  // Clean any unwanted characters like brackets or quotes
+                                                    console.log(`Opening URL: ${cleanUrl}`); // Log which URL is being opened
+                                                    window.open(cleanUrl, '_blank');  // Open the cleaned URL in a new tab
+                                                  });
+                                                }}
+                                                style={{ color: "#012169", textDecoration: "underline" }}
+                                            >
+                                             Download Assessment Result
+                                            </a></h3>
                       </>
-                    ) : null}
+                    
 
                     {/* <hr className="payment-line" /> */}
                     {/* <h2>{formData.email}</h2> */}
@@ -2584,6 +2921,64 @@ function MainView({ setPage, page }) {
                 </Modal.Body>
               </Modal>
             ) : null}
+
+
+{preEnrollmentStatus == 'paid' ? (
+              <Modal show={showRequirementsModal} id="modal-container" centered>
+                {/* <Modal.Header closeButton>
+          <Modal.Title>Applicant Information</Modal.Title>
+        </Modal.Header> */}
+                <Modal.Body>
+                  <div className="payment-box">
+                    {/* <img src={wallet} className="logo-verification" /> */}
+                    <h1>Assessment Results:</h1>
+                    <h2>
+                      Remarks:{" "}
+                      <strong style={{ color: isPassed ? "green" : "red" }}>
+                        {admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]?.["is_passed"]
+                          ? "PASSED"
+                          : "FAILED"}
+                      </strong>
+                    </h2>
+                    <hr />
+                    {isPassed ? (
+                      <>
+                        <h2>Pre Enrollment Requirements</h2>
+                        <hr />
+                        <h3>1x PSA Birth Certificate (Original Copy)</h3>
+                        <h3>1x Report Card (Previous School)</h3>
+                        {admissions["admissionsArr"][dataIndex][
+                          "db_admission_table"
+                        ]["admission_status"] =='PROBATIONARY' && (<>
+                        <h3>Probationary Contract</h3>
+                        </>)}
+                        <h3>
+                          Please submit the pre requirements at the school.
+                          Thank you!
+                        </h3>
+                      </>
+                    ) : null}
+
+                    {/* <hr className="payment-line" /> */}
+                    {/* <h2>{formData.email}</h2> */}
+
+                    <hr className="line-container" />
+                    <button
+                      className="btn btn-blue"
+                      onClick={() => {
+                        setRequirementsModal(false);
+                        // setPage("main");
+                      }}
+                    >
+                      Ok, got it!
+                    </button>
+                  </div>
+                </Modal.Body>
+              </Modal>
+            ) : null}
+
             <div className="main-dashboard-container">
               <div className="mobile-app-bar">
                 <img
@@ -2658,7 +3053,7 @@ function MainView({ setPage, page }) {
                   </div>
                 </section>
                 {admissionSelected ? (
-                  <section className="status-tracking-section">
+                  <section className="status-tracking-section"  style={toPreEnrollment ? { height: "80vh", overflowY: "scroll" , marginBottom: "40px"} : {}}>
                     <div className="tracking-section">
                       <div>
                         <h4 className="admission-step-ls">Registration</h4>
@@ -2667,6 +3062,11 @@ function MainView({ setPage, page }) {
                         <h4 className="admission-step-ls">Payment</h4>
                         <h4 className="admission-step-ls">Assessment</h4>
                         <h4 className="admission-step-ls">Results</h4>
+                        {toPreEnrollment && (
+                        <>
+                        <h4 className="admission-step-ls">Payment</h4>
+                        <h4 className="admission-step-ls">Submit</h4>
+                        </>)}
                       </div>
                     </div>
                     <StatusTracker
@@ -2692,6 +3092,10 @@ function MainView({ setPage, page }) {
                           "db_admission_table"
                         ]["is_all_required_file_uploaded"]
                       }
+                      isAssessmentAttended={isAssessmentAttended}
+                      toPreEnrollment={toPreEnrollment}
+                      preEnrollmentStatus={preEnrollmentStatus}
+                      toPreRequirement={toPreRequirement}
                     />
                     <div className="tracking-desc-section">
                       <div className="desc-steps">
@@ -2761,7 +3165,7 @@ function MainView({ setPage, page }) {
                           style={{ color: isPaymentComplete ? "#aaa" : "" }}
                           className="admission-step desc-step desc-step-succ"
                           onClick={() => {
-                            if (!isUploadComplete || isApplicationPending) {
+                            if (!isUploadComplete) {
                               return;
                             }
                             setPage("payment");
@@ -2785,10 +3189,16 @@ function MainView({ setPage, page }) {
                         >
                           Select Schedule and Assessment Exam
                         </h4>
-                        <h4 className="admission-step  desc-step desc-step-succ last-step">
-                          {isResultSent
+                        <h4 className={`admission-step desc-step desc-step-succ ${
+                              !toPreEnrollment ? "last-step" : ""
+                            }`}
+                            style={{ color: isResultSent ? "#aaa" : "" }}
+                          >
+
+                          {/*isResultSent
                             ? "Results available"
-                            : "Wait for Results"}
+                            : "Wait for Results"*/}
+                          Assessment Result
 
                           {isResultSent ? (
                             <span
@@ -2802,6 +3212,42 @@ function MainView({ setPage, page }) {
                             </span>
                           ) : null}
                         </h4>
+                        {toPreEnrollment && (
+                        <>
+                          <h4
+                          style={{ color: preEnrollmentStatus=='paid' ? "#aaa" : "" }}
+                          className="admission-step desc-step desc-step-succ"
+                          onClick={() => {
+                            if (preEnrollmentStatus != 'paid' ) {
+                              setPage("pre-enrollment");
+                            }else{
+                              return;
+                            }
+                          }}
+                          >
+                            Pay Reservation Fee
+                            {preEnrollmentStatus == 'paid' ? (
+                            <span
+                              onClick={() => {
+                                console.log("clicked");
+                                setRequirementsModal(true);
+                              }}
+                              className="results-requirements"
+                            >
+                              View Pre-Enrollment Requirements
+                            </span>
+                          ) : null}
+                          </h4>
+
+                          <h4
+                          style={{ color: toPreRequirement ? "#aaa" : "" }}
+                          className="admission-step desc-step desc-step-succ last-step" 
+                          >
+                            Submit Hard Copy of Requirements
+                            
+                          </h4>
+                        </>)}
+                        
                       </div>
                     </div>
                     
@@ -2833,11 +3279,11 @@ function MainView({ setPage, page }) {
             )}
             
             <div className='main-section mobile-main' style={{
-    borderBottom: 'none', // Remove border
-    boxShadow: 'none',    // Remove shadow
-    textDecoration: 'none', // Remove underline
-  }}
->
+                borderBottom: 'none', // Remove border
+                boxShadow: 'none',    // Remove shadow
+                textDecoration: 'none', // Remove underline
+              }}
+            >
               <section className="applicant-list-section"></section>
               <section className="status-list-section">
                 {//<StatusCircles />
@@ -4903,6 +5349,8 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(1)}
+                setDownloadedFiles={setDownloadedFiles}
+                downloadedFiles={downloadedFiles}
               />
               <Requirement
                 fetchAdmissions={getUserAdmissions}
@@ -4915,6 +5363,8 @@ function MainView({ setPage, page }) {
                 requirements={requirements}
                 handleRequirements={setRequirements}
                 isRejected={requirementsRejectedArr.includes(2)}
+                setDownloadedFiles={setDownloadedFiles}
+                downloadedFiles={downloadedFiles}
               />
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
                 "level_applying_for"
@@ -4934,6 +5384,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(4)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles}
                   />
                 </>
               ) : (
@@ -4952,6 +5404,8 @@ function MainView({ setPage, page }) {
                       requirements={requirements}
                       handleRequirements={setRequirements}
                       isRejected={requirementsRejectedArr.includes(3)}
+                      setDownloadedFiles={setDownloadedFiles}
+                      downloadedFiles={downloadedFiles} 
                     />
                   ) : null}
                   <Requirement
@@ -4965,6 +5419,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(14)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -4975,6 +5431,8 @@ function MainView({ setPage, page }) {
                     fileText={"file_name.jpg/png/pdf"}
                     requirements={requirements}
                     handleRequirements={setRequirements}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                 </>
               )}
@@ -4993,6 +5451,8 @@ function MainView({ setPage, page }) {
                   requirements={requirements}
                   handleRequirements={setRequirements}
                   isRejected={requirementsRejectedArr.includes(13)}
+                  setDownloadedFiles={setDownloadedFiles}
+                  downloadedFiles={downloadedFiles} 
                 />
               ) : null}
               {admissions["admissionsArr"][dataIndex]["db_admission_table"][
@@ -5010,6 +5470,8 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(11)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                   <Requirement
                     fetchAdmissions={getUserAdmissions}
@@ -5022,20 +5484,24 @@ function MainView({ setPage, page }) {
                     requirements={requirements}
                     handleRequirements={setRequirements}
                     isRejected={requirementsRejectedArr.includes(12)}
+                    setDownloadedFiles={setDownloadedFiles}
+                    downloadedFiles={downloadedFiles} 
                   />
                 </>
               ) : null}
             </div>
             <div className="upload-btn-container">
-              {edit ? (
+              {
+              
+              edit ? (
+                
                 <button
-                  className={`${
-                    requirements.filter((el) => el.file.length > 0).length == 0
+                  className={`${ requirements.filter((el) => el.file.length > 0).length == 0
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={() => {
-                    handleUpload(requirements);
+                      handleUpload(requirements);
                   }}
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
@@ -5045,16 +5511,16 @@ function MainView({ setPage, page }) {
               ) : null}
               {!edit ? (
                 <button
-                  className={`${
-                    requirements.filter((el) => el.file.length > 0).length ==
-                      0 ||
-                    getLengthRequirements() !=
-                      requirements.filter((rqmt) => rqmt.file.length > 0).length
+                  className={`${ !areRequiredFilesDownloaded() || requirements.filter((el) => el.file.length > 0).length != getRequiredDocumentsCount(admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                    "level_applying_for"], admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                      "religion"],admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                        "citizenship"])
                       ? "btn-grey"
                       : "btn-blue"
                   } btn btn-add upload-btn`}
                   onClick={
-                    requirements.filter((el) => el.file.length > 0).length ==
+                    
+                    areRequiredFilesDownloaded() && requirements.filter((el) => el.file.length > 0).length ==
                       0 ||
                     getLengthRequirements() !=
                       requirements.filter((rqmt) => rqmt.file.length > 0).length
@@ -5146,26 +5612,14 @@ function MainView({ setPage, page }) {
       case "calendar":
         return (
           <>
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-              "db_exam_admission_schedule"
-            ].length > 0 ? (
+            {admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]?.["db_exam_admission_schedule"].length> 0 ? (
               <Modal show={showReschedModal} id="modal-container" centered>
                 {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
         </Modal.Header> */}
                 <Modal.Body>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      await handleSchedCancellation(
-                        admissions["admissionsArr"][dataIndex][
-                          "db_admission_table"
-                        ]["db_exam_admission_schedule"][0]["eas_id"],
-                        cancelReasonString
-                      );
-                      setPage("main");
-                    }}
-                  >
                     <div className="payment-box">
                       {/* <img src={wallet} className="logo-verification" /> */}
                       <h1>Cancel this schedule?</h1>
@@ -5239,40 +5693,80 @@ function MainView({ setPage, page }) {
                       {/* <h2>{formData.email}</h2> */}
 
                       <hr className="line-container" />
-                      <button className="btn btn-blue">Cancel schedule</button>
+                      <button
+                        className="btn btn-blue"
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          if (cancelReasonString.trim() !== "") {
+                            await handleSchedCancellation(
+                              admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
+                              cancelReasonString
+                            );
+                            setPage("main");
+                          }
+                        }}
+                        disabled={!cancelReasonString.trim()}
+                      >
+                        Cancel schedule
+                      </button>
                       <button
                         className="btn btn-grey"
                         onClick={() => {
                           setShowReschedModal(false);
                         }}
                       >
-                        Cancel
+                        Back
                       </button>
                     </div>
-                  </form>
                 </Modal.Body>
               </Modal>
             ) : null}
 
-            {admissions["admissionsArr"][dataIndex]["db_admission_table"][
-              "db_exam_admission_schedule"
-            ].length > 0 ? (
+            {admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]?.["db_exam_admission_schedule"].length> 0 ? (
               <Modal
                 show={
-                  admissions["admissionsArr"][dataIndex]["db_admission_table"][
-                    "db_exam_admission_schedule"
-                  ].length > 0
+                  admissions["admissionsArr"][dataIndex][
+                    "db_admission_table"
+                  ]?.["db_exam_admission_schedule"].length > 0
                 }
                 id="modal-container"
                 centered
               >
                 {/* <Modal.Header closeButton>
           <Modal.Title>Applicant Information</Modal.Title>
-        </Modal.Header> */}
+        </Modal.Header> */
+        
+        }
                 <Modal.Body>
                   <div className="payment-box">
                     {/* <img src={wallet} className="logo-verification" /> */}
-                    <h1>Your Assessment Exam Schedule:</h1>
+                    <h1>{admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"] ==null?checkExamStatus(admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]?.["db_exam_admission_schedule"]?.[0]?.[
+                              "db_exam_schedule_table"
+                            ]?.["exam_date"], convertMilitaryToAMPM(
+                              admissions["admissionsArr"][dataIndex][
+                                "db_admission_table"
+                              ]["db_exam_admission_schedule"][0][
+                                "db_exam_schedule_table"
+                              ]?.["start_time"] ?? ""
+                            ),convertMilitaryToAMPM(
+                              admissions["admissionsArr"][dataIndex][
+                                "db_admission_table"
+                              ]["db_exam_admission_schedule"][0][
+                                "db_exam_schedule_table"
+                              ]?.["end_time"] ?? ""
+                            ))?'Today is scheduled assessment':'Your Scheduled Assessment':admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"]?'Your scheduled assessment has been completed. Please await the results.':'Your Scheduled Assessment was not attended. Please reschedule if needed.'
+                    }
+                    </h1>
                     <h3>
                       Date:{" "}
                       <strong>
@@ -5319,10 +5813,27 @@ function MainView({ setPage, page }) {
                     {/* <hr className="payment-line" /> */}
                     {/* <h2>{formData.email}</h2> */}
 
+                    <br></br>
+                    <h3>
+                        <a href={getLevelAssessmentReminder(`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}`)} download={`${admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']}-assessment`} style={{ color: "#012169", textDecoration: "underline" }}>
+                        View {admissions["admissionsArr"][dataIndex]["db_admission_table"]['level_applying_for']} Assessment Reminder
+                        </a>
+                    </h3>
                     <hr className="line-container" />
                     <button
                       className="btn btn-blue"
-                      onClick={() => {
+                      onClick={async(e) => {
+                          if(!admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"] && admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"] !=null){ 
+                            await handleSchedCancellation(admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["eas_id"],
+                              'to be reschedule, due to failed to attend the assessment schedule'
+                            );
+                          }
                         setPage("main");
                         setShowReschedModal(false);
                       }}
@@ -5339,7 +5850,40 @@ function MainView({ setPage, page }) {
                       }}
                     >
                       Reschedule
-                    </button>*/}
+                    </button>*/
+                    
+                    (() => {
+                      const examDate = admissions["admissionsArr"][dataIndex]["db_admission_table"]["db_exam_admission_schedule"][0]["db_exam_schedule_table"]["exam_date"];
+                      const today = new Date();
+                      const examDateObj = new Date(examDate);
+                      
+                      // Calculate the difference in days
+                      const daysDifference = getDateDifferenceInDays(today, examDateObj);
+                      console.log(daysDifference);
+                      // Enable "Reschedule" button only if the difference is 2 days or less
+                      return (
+                        <button
+                          className="btn btn-red"
+                          onClick={() => {
+                            console.log("wahaha");
+                            setCancelReasonString("");
+                            setShowReschedModal((prev) => !prev);
+                          }}
+                          disabled={daysDifference >= 2 || (admissions["admissionsArr"][dataIndex][
+                            "db_admission_table"
+                          ]["db_exam_admission_schedule"][0][
+                            "is_attended"] && admissions["admissionsArr"][dataIndex][
+                              "db_admission_table"
+                            ]["db_exam_admission_schedule"][0][
+                              "is_attended"] !=null)} // Disable if more than 2 days difference
+                        >
+                          Reschedule
+                        </button>
+                      );
+                    })()
+              
+                    
+                    }
                   </div>
                 </Modal.Body>
               </Modal>
@@ -5451,13 +5995,13 @@ function MainView({ setPage, page }) {
                   <img src={back} onClick={() => setPage("main")} />
                   <h1>Assessment Exam Schedules</h1>
                 </div>
-                <button
+                {/*<button
                   className="btn-blue btn btn-add"
                   // onClick={addApplicant}
                   // onClick={() => setPage("personal-form")}
                 >
                   Confirm
-                </button>
+                </button>*/}
               </div>
             </div>
             <div className="select-sched-container">
@@ -5574,6 +6118,23 @@ function MainView({ setPage, page }) {
               </div>
             </div>
           </>
+        );
+
+
+      case "pre-enrollment":
+        return (
+          <PreEnrollmentPayment
+            dataIndex={dataIndex}
+            paymethodId={
+              admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['pay_method_id'] || 0
+            }
+            applicationId={
+              admissions["admissionsArr"][dataIndex]["db_admission_table"][
+                "admission_form_id"
+              ]
+            }
+            setPage={setPage}
+          />
         );
       default:
         return <div>hello</div>;

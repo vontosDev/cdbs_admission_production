@@ -23,14 +23,14 @@ function ApplicantCard({
   const handleDelete = async (admissionId) => {
     // setLoading(true);
     await fetch(
-      "https://dbs-api-live.vercel.app/api/admission/delete_admission",
+      "https://donboscoapi.vercel.app/api/admission/delete_admission",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "supabase-url": "https://ligqdgmwtziqytxyqpvv.supabase.co/",
+          "supabase-url": "https://srseiyeepchrklzxawsm.supabase.co/",
           "supabase-key":
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxpZ3FkZ213dHppcXl0eHlxcHZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NTE0MDQsImV4cCI6MjA1MjMyNzQwNH0.qHmECzoG1DfCs9zjirzwRzmp2V9OhBsKUr6tgnDCCq8",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNyc2VpeWVlcGNocmtsenhhd3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5ODE2NjgsImV4cCI6MjAzMzU1NzY2OH0.WfcrXLHOj1aDt36XJ873SP8syg4I41rJgE_uV_X1vkU",
         },
         body: JSON.stringify({
           admission_id: admissionId,
@@ -53,6 +53,10 @@ function ApplicantCard({
     const isAssess=admissionTable["is_for_assessment"];
     const isResult = admissionTable["is_final_result"];
     const isPassed =admissionTable["is_passed"];
+    const isAttended = admissionTable["db_exam_admission_schedule"]?.[0]?.["is_attended"];
+    const toPreEnrollment = admissionTable["is_preenrollment_reservation"] ?? false;
+    const isPreRequire = admissionTable["is_pre_requirement_submitted"] ?? false;
+    const preEnrollmentStatus = admissionTable?.["db_payments_table"]?.[0]?.['status'] || '';
     // Check application creation and status
     if (!isApplicationCreated && !isCompleteView) {
       return { text: "Application - Ready to proceed", color: "yellow" };
@@ -69,9 +73,6 @@ function ApplicantCard({
       
       if (isApplicationCreated && rejectCount > 0) {
         return { text: "Requirements - Rejected, revisions needed", color: "red" };
-      }
-      else{
-        return { text: "Application - Awaiting approval", color: "blue" };
       }
       
     }
@@ -101,22 +102,41 @@ function ApplicantCard({
       return { text: "Assessment Exam - Ready to proceed", color: "yellow" };
     }
 
-    if(examSchedCount>0 && !isAssess){
-      return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+    if(isPaid && examSchedCount>0){
+      if(!isAssess){
+        if(!isAttended && isAttended!=null){
+          return { text: "Assessment Exam - Not Attended", color: "red" };
+        }else{
+          return { text: "Assessment Exam - Awaiting approval", color: "blue" };
+        } 
+      }
     }
 
     if(isAssess && !isResult){
       return { text: "Results - Awaiting approval", color: "blue" };
     }
-
-    if(isResult){
-      if(isPassed){
-        return { text: "Results - Passed", color: "green" };
+    
+    if(isResult && isPassed){
+      console.log('do this',admissionData['admission_id'])
+      if(toPreEnrollment && !isPreRequire){
+        if(preEnrollmentStatus=='' || preEnrollmentStatus==null){
+          return { text: "Reservation - Ready to proceed", color: "yellow" };
+        }else if(preEnrollmentStatus=='pending'){
+          return { text: "Reservation - Awaiting approval", color: "blue" };
+        }else{
+          return { text: "Requirements - Ready to proceed", color: "yellow" };
+        }
       }else{
-        return { text: "Results - Failed", color: "red" };
+        return { text: "Admission - Complete", color: "green" };
       }
+      
     }
 
+    if(!isPassed){
+      return { text: "Results - Failed", color: "red" };
+    }
+    
+  
     // Default case
     return { text: "Application - Ready to proceed", color: "yellow" };
   };
