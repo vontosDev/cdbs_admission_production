@@ -432,7 +432,6 @@ function MainView({ setPage, page }) {
     toPreRequirement = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_pre_requirement_submitted"];
     preEnrollmentStatus = admissions?.["admissionsArr"]?.[dataIndex]?.["db_admission_table"]?.["db_payments_table"]?.[0]?.['status'] || '';
     toPreEnrollment = admissions["admissionsArr"][dataIndex]["db_admission_table"]["is_preenrollment_reservation"] ?? false;
-
     isResultPending =
       admissions["admissionsArr"][dataIndex]["db_admission_table"][
         "is_for_assessment"
@@ -3091,6 +3090,7 @@ const getRejectRequirementIds = (type) => {
                       isAssessmentAttended={isAssessmentAttended}
                       toPreEnrollment={toPreEnrollment}
                       preEnrollmentStatus={preEnrollmentStatus}
+                      toPreRequirement={toPreRequirement}
                     />
                     <div className="tracking-desc-section">
                       <div className="desc-steps">

@@ -78,6 +78,7 @@ function ApplicantCard({
     }
   
     // Check requirements status
+    if(!isResult){
     if (isApplicationCreated && isCompleteView) {
   
       if (pendingCount > 0 && rejectCount === 0) {
@@ -115,7 +116,7 @@ function ApplicantCard({
     if(isAssess && !isResult){
       return { text: "Results - Awaiting approval", color: "blue" };
     }
-
+  }
     if(isResult && isPassed){
       console.log('do this',admissionData['admission_id'])
       if(toPreEnrollment && !isPreRequire){

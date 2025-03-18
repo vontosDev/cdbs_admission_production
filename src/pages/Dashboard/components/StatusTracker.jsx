@@ -23,6 +23,8 @@ function StatusTracker({
   preEnrollmentStatus,
   toPreRequirement
 }) {
+
+  console.log('submitted',toPreRequirement)
   return (
     <div className="steps-container ">
       <div className="circle">
